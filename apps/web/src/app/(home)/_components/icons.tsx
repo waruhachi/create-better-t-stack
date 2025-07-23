@@ -22,7 +22,7 @@ const PackageIcon = ({ pm, className }: { pm: string; className?: string }) => {
 					<path d="M10.749,10.75H2V2h8.749Z" style={{ fill: "#f9ad00" }} />
 					<path d="M30,20.375H21.251v-8.75H30Z" style={{ fill: "#f9ad00" }} />
 					<path d="M20.374,20.375h-8.75v-8.75h8.75Z" style={{ fill: "#fff" }} />
-					<path d="M20.374, 30h - 8.75V21.25h8.75Z" style={{ fill: "#fff" }} />
+					<path d="M20.374,30h-8.75V21.25h8.75Z" style={{ fill: "#fff" }} />
 					<path d="M30,30H21.251V21.25H30Z" style={{ fill: "#fff" }} />
 					<path d="M10.749,30H2V21.25h8.749Z" style={{ fill: "#fff" }} />
 				</svg>
