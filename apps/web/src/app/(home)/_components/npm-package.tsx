@@ -9,7 +9,7 @@ const NpmPackage = () => {
 		const getLatestVersion = async () => {
 			try {
 				const res = await fetch(
-					"https://api.github.com/repos/AmanVarshney01/create-better-t-stack/releases",
+					"https://registry.npmjs.org/create-better-t-stack/latest",
 				);
 				if (!res.ok) throw new Error("Failed to fetch version");
 				const data = await res.json();
