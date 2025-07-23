@@ -12,12 +12,11 @@ const NpmPackage = () => {
 			setVersionLoading(true);
 			try {
 				const res = await fetch(
-					"https://api.github.com/repos/AmanVarshney01/create-better-t-stack/releases",
+					"https://registry.npmjs.org/create-better-t-stack/latest",
 				);
 				if (!res.ok) throw new Error("Failed to fetch version");
 				const data = await res.json();
-				const latestVersion = data[0].tag_name.split("@")[1];
-				setVersion(latestVersion);
+				setVersion(data.version);
 			} catch (error) {
 				console.error("Error fetching NPM version:", error);
 				setVersion("?.?.?");
