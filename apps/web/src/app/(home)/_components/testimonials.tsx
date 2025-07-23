@@ -2,7 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Terminal } from "lucide-react";
-import { Tweet } from "react-tweet";
+import Image from "next/image";
+import { Suspense } from "react";
+import { Tweet, TweetSkeleton, type TwitterComponents } from "react-tweet";
 
 const TWEET_IDS = [
 	"1930194170418999437",
@@ -71,6 +73,11 @@ const TWEET_IDS = [
 	"1906570888897777847",
 ];
 
+export const components: TwitterComponents = {
+	AvatarImg: (props) => <Image {...props} unoptimized />,
+	MediaImg: (props) => <Image {...props} fill unoptimized />,
+};
+
 export default function Testimonials() {
 	const getResponsiveColumns = (numCols: number) => {
 		const columns: string[][] = Array(numCols)
@@ -129,7 +136,9 @@ export default function Testimonials() {
 				</div>
 				<div className="w-full min-w-0 overflow-hidden">
 					<div style={{ width: "100%", minWidth: 0, maxWidth: "100%" }}>
-						<Tweet id={tweetId} />
+						<Suspense fallback={<TweetSkeleton />}>
+							<Tweet id={tweetId} />
+						</Suspense>
 					</div>
 				</div>
 			</div>

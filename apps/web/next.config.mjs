@@ -10,6 +10,12 @@ const config = {
 	experimental: {
 		reactCompiler: true,
 	},
+	images: {
+		remotePatterns: [
+			{ protocol: "https", hostname: "pbs.twimg.com" },
+			{ protocol: "https", hostname: "abs.twimg.com" },
+		],
+	},
 	async rewrites() {
 		return [
 			{
