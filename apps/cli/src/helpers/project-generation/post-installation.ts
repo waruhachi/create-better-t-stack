@@ -142,6 +142,10 @@ export async function displayPostInstallInstructions(
 		output += `${pc.cyan("•")} Docs: http://localhost:4321\n`;
 	}
 
+	if (addons?.includes("fumadocs")) {
+		output += `${pc.cyan("•")} Fumadocs: http://localhost:4000\n`;
+	}
+
 	if (nativeInstructions) output += `\n${nativeInstructions.trim()}\n`;
 	if (databaseInstructions) output += `\n${databaseInstructions.trim()}\n`;
 	if (tauriInstructions) output += `\n${tauriInstructions.trim()}\n`;
@@ -249,7 +253,7 @@ async function getDatabaseInstructions(
 	}
 
 	if (orm === "prisma") {
-		if (database === "sqlite") {
+		if (dbSetup === "turso") {
 			instructions.push(
 				`${pc.yellow(
 					"NOTE:",
@@ -258,13 +262,6 @@ async function getDatabaseInstructions(
 			);
 		}
 
-		if (runtime === "bun") {
-			instructions.push(
-				`${pc.yellow(
-					"NOTE:",
-				)} Prisma with Bun may require additional configuration. If you encounter errors,\nfollow the guidance provided in the error messages`,
-			);
-		}
 		if (database === "mongodb" && dbSetup === "docker") {
 			instructions.push(
 				`${pc.yellow(

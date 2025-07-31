@@ -2,6 +2,12 @@
 
 A modern CLI tool for scaffolding end-to-end type-safe TypeScript projects with best practices and customizable configurations
 
+## Sponsors
+
+<p align="center">
+<img src="https://sponsors.amanv.dev/sponsors.png" alt="Sponsors">
+</p>
+
 ![demo](https://cdn.jsdelivr.net/gh/amanvarshney01/create-better-t-stack/demo.gif)
 
 ## Quick Start
@@ -60,12 +66,6 @@ bun dev:web
 ## Want to contribute?
 
 Just fork the repository and submit a pull request!
-
-## Sponsors
-
-<p align="center">
-<img src="https://sponsors.amanv.dev/sponsors.png" alt="Sponsors" width="300">
-</p>
 
 ## Star History
 

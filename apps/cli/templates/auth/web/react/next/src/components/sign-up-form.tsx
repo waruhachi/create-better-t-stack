@@ -35,7 +35,7 @@ export default function SignUpForm({
             toast.success("Sign up successful");
           },
           onError: (error) => {
-            toast.error(error.error.message);
+            toast.error(error.error.message || error.error.statusText);
           },
         },
       );
@@ -61,7 +61,7 @@ export default function SignUpForm({
         onSubmit={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          void form.handleSubmit();
+          form.handleSubmit();
         }}
         className="space-y-4"
       >

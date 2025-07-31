@@ -129,11 +129,15 @@ const getBadgeColors = (category: string): string => {
 	}
 };
 
-const TechIcon: React.FC<{
+function TechIcon({
+	icon,
+	name,
+	className,
+}: {
 	icon: string;
 	name: string;
 	className?: string;
-}> = ({ icon, name, className }) => {
+}) {
 	const [mounted, setMounted] = useState(false);
 	const { theme } = useTheme();
 
@@ -168,7 +172,7 @@ const TechIcon: React.FC<{
 			{icon}
 		</span>
 	);
-};
+}
 
 const getCategoryDisplayName = (categoryKey: string): string => {
 	const result = categoryKey.replace(/([A-Z])/g, " $1");
@@ -446,21 +450,6 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 						category: "dbSetup",
 						message:
 							"Database set to 'PostgreSQL' (required by Prisma PostgreSQL setup)",
-					});
-				}
-				if (nextStack.orm !== "prisma") {
-					notes.dbSetup.notes.push("Requires Prisma ORM. It will be selected.");
-					notes.orm.notes.push(
-						"Prisma PostgreSQL setup requires Prisma ORM. It will be selected.",
-					);
-					notes.dbSetup.hasIssue = true;
-					notes.orm.hasIssue = true;
-					nextStack.orm = "prisma";
-					changed = true;
-					changes.push({
-						category: "dbSetup",
-						message:
-							"ORM set to 'Prisma' (required by Prisma PostgreSQL setup)",
 					});
 				}
 			} else if (nextStack.dbSetup === "mongodb-atlas") {
@@ -769,10 +758,36 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 
 			if (
 				nextStack.addons.includes("husky") &&
-				!nextStack.addons.includes("biome")
+				!nextStack.addons.includes("biome") &&
+				!nextStack.addons.includes("oxlint")
 			) {
 				notes.addons.notes.push(
-					"Husky addon is selected without Biome. Consider adding Biome for lint-staged integration.",
+					"Husky addon is selected without a linter. Consider adding Biome or Oxlint for lint-staged integration.",
+				);
+			}
+
+			if (nextStack.addons.includes("ultracite")) {
+				if (nextStack.addons.includes("biome")) {
+					notes.addons.notes.push(
+						"Ultracite includes Biome setup. Biome addon will be removed.",
+					);
+					nextStack.addons = nextStack.addons.filter(
+						(addon) => addon !== "biome",
+					);
+					changed = true;
+					changes.push({
+						category: "addons",
+						message: "Biome addon removed (included in Ultracite)",
+					});
+				}
+			}
+
+			if (
+				nextStack.addons.includes("oxlint") &&
+				nextStack.addons.includes("biome")
+			) {
+				notes.addons.notes.push(
+					"Both Oxlint and Biome are selected. Consider using only one linter.",
 				);
 			}
 
@@ -982,7 +997,26 @@ const generateCommand = (stackState: StackState): string => {
 
 	if (!checkDefault("addons", stackState.addons)) {
 		if (stackState.addons.length > 0) {
-			flags.push(`--addons ${stackState.addons.join(" ")}`);
+			const validAddons = stackState.addons.filter((addon) =>
+				[
+					"pwa",
+					"tauri",
+					"starlight",
+					"biome",
+					"husky",
+					"turborepo",
+					"ultracite",
+					"fumadocs",
+					"oxlint",
+				].includes(addon),
+			);
+			if (validAddons.length > 0) {
+				flags.push(`--addons ${validAddons.join(" ")}`);
+			} else {
+				if (DEFAULT_STACK.addons.length > 0) {
+					flags.push("--addons none");
+				}
+			}
 		} else {
 			if (DEFAULT_STACK.addons.length > 0) {
 				flags.push("--addons none");
@@ -1702,7 +1736,10 @@ const StackBuilder = () => {
 																					<TechIcon
 																						icon={tech.icon}
 																						name={tech.name}
-																						className="mr-1.5 h-3 w-3 sm:h-4 sm:w-4"
+																						className={cn(
+																							"mr-1.5 h-3 w-3 sm:h-4 sm:w-4",
+																							tech.className,
+																						)}
 																					/>
 																				)}
 																				<span

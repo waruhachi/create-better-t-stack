@@ -1,5 +1,62 @@
 # create-better-t-stack
 
+## 2.28.5
+
+### Patch Changes
+
+- 2ad89b7: fix auth error handling in all react templates
+
+## 2.28.4
+
+### Patch Changes
+
+- 53985fe: fix nuxt template issues with bun
+
+## 2.28.3
+
+### Patch Changes
+
+- 17389ac: Update Nuxt template deps and add tailwind as dep
+
+## 2.28.2
+
+### Patch Changes
+
+- c8df019: update readme
+
+## 2.28.1
+
+### Patch Changes
+
+- 16c4d42: Upgrade to Prisma 6.13.0
+
+## 2.28.0
+
+### Minor Changes
+
+- 216c242: Added addons: fumadocs, ultracite, oxlint
+
+  Added bunfig.toml with isolated linker
+
+  Grouped addon prompts
+
+### Patch Changes
+
+- 82a4f42: Added Sao Paulo region
+
+## 2.27.1
+
+### Patch Changes
+
+- 31be802: Update prisma setup options labels and hints
+
+## 2.27.0
+
+### Minor Changes
+
+- 0c26578: feat: Add quick setup option with create-db by Prisma
+  feat: Make Prisma Postgres available for both Prisma and Drizzle ORMs
+
 ## 2.26.5
 
 ### Patch Changes

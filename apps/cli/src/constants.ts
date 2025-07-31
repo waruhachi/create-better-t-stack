@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Frontend, ProjectConfig } from "./types";
+import type { Addons, Frontend, ProjectConfig } from "./types";
 import { getUserPkgManager } from "./utils/get-package-manager";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,13 +28,14 @@ export const DEFAULT_CONFIG: ProjectConfig = {
 };
 
 export const dependencyVersionMap = {
-	"better-auth": "^1.3.0",
-	"@better-auth/expo": "^1.3.0",
+	"better-auth": "^1.3.4",
+	"@better-auth/expo": "^1.3.4",
 
 	"drizzle-orm": "^0.44.2",
 	"drizzle-kit": "^0.31.2",
 
 	"@libsql/client": "^0.15.9",
+
 	"@neondatabase/serverless": "^1.0.1",
 	pg: "^8.14.1",
 	"@types/pg": "^8.11.11",
@@ -43,8 +44,9 @@ export const dependencyVersionMap = {
 
 	mysql2: "^3.14.0",
 
-	"@prisma/client": "^6.9.0",
-	prisma: "^6.9.0",
+	"@prisma/client": "^6.13.0",
+	prisma: "^6.13.0",
+	"@prisma/extension-accelerate": "^2.0.2",
 
 	mongoose: "^8.14.0",
 
@@ -53,10 +55,12 @@ export const dependencyVersionMap = {
 
 	"@tauri-apps/cli": "^2.4.0",
 
-	"@biomejs/biome": "^2.0.0",
+	"@biomejs/biome": "^2.1.2",
+	oxlint: "^1.8.0",
+	ultracite: "5.1.1",
 
 	husky: "^9.1.7",
-	"lint-staged": "^15.5.0",
+	"lint-staged": "^16.1.2",
 
 	tsx: "^4.19.2",
 	"@types/node": "^22.13.11",
@@ -89,8 +93,6 @@ export const dependencyVersionMap = {
 	"@ai-sdk/svelte": "^2.1.9",
 	"@ai-sdk/react": "^1.2.12",
 
-	"@prisma/extension-accelerate": "^1.3.0",
-
 	"@orpc/server": "^1.5.0",
 	"@orpc/client": "^1.5.0",
 	"@orpc/tanstack-query": "^1.5.0",
@@ -119,13 +121,16 @@ export const dependencyVersionMap = {
 
 export type AvailableDependencies = keyof typeof dependencyVersionMap;
 
-export const ADDON_COMPATIBILITY = {
+export const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
 	pwa: ["tanstack-router", "react-router", "solid", "next"],
 	tauri: ["tanstack-router", "react-router", "nuxt", "svelte", "solid"],
 	biome: [],
 	husky: [],
 	turborepo: [],
 	starlight: [],
+	ultracite: [],
+	oxlint: [],
+	fumadocs: [],
 	none: [],
 } as const;
 

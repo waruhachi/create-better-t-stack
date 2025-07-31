@@ -1,8 +1,18 @@
 import { Banner } from "fumadocs-ui/components/banner";
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
+import { DocsLayout, type DocsLayoutProps } from "fumadocs-ui/layouts/docs";
 import type { ReactNode } from "react";
 import { baseOptions } from "@/app/layout.config";
+import { SpecialSponsorBanner } from "@/components/special-sponsor-banner";
 import { source } from "@/lib/source";
+
+const docsOptions: DocsLayoutProps = {
+	...baseOptions,
+	tree: source.pageTree,
+	links: [],
+	sidebar: {
+		banner: <SpecialSponsorBanner />,
+	},
+};
 
 export default function Layout({ children }: { children: ReactNode }) {
 	return (
@@ -10,9 +20,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 			<Banner variant="rainbow">
 				⚠️ WORK IN PROGRESS DONT TAKE REFERENCE!!!
 			</Banner>
-			<DocsLayout tree={source.pageTree} {...baseOptions}>
-				{children}
-			</DocsLayout>
+			<DocsLayout {...docsOptions}>{children}</DocsLayout>
 		</>
 	);
 }

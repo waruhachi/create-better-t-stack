@@ -13,7 +13,7 @@ import { setupPrismaPostgres } from "../database-providers/prisma-postgres-setup
 import { setupSupabase } from "../database-providers/supabase-setup";
 import { setupTurso } from "../database-providers/turso-setup";
 
-export async function setupDatabase(config: ProjectConfig): Promise<void> {
+export async function setupDatabase(config: ProjectConfig) {
 	const { database, orm, dbSetup, backend, projectDir } = config;
 
 	if (backend === "convex" || database === "none") {
@@ -84,7 +84,7 @@ export async function setupDatabase(config: ProjectConfig): Promise<void> {
 		} else if (database === "sqlite" && dbSetup === "d1") {
 			await setupCloudflareD1(config);
 		} else if (database === "postgres") {
-			if (orm === "prisma" && dbSetup === "prisma-postgres") {
+			if (dbSetup === "prisma-postgres") {
 				await setupPrismaPostgres(config);
 			} else if (dbSetup === "neon") {
 				await setupNeonPostgres(config);

@@ -4,10 +4,23 @@ import {
 	Github,
 	Globe,
 	Heart,
+	Star,
 	Terminal,
 } from "lucide-react";
 import Image from "next/image";
+// import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+	filterCurrentSponsors,
+	filterPastSponsors,
+	filterRegularSponsors,
+	filterSpecialSponsors,
+	formatSponsorUrl,
+	getSponsorUrl,
+	isSpecialSponsor,
+	sortSpecialSponsors,
+	sortSponsors,
+} from "@/lib/sponsor-utils";
 import type { Sponsor } from "@/lib/types";
 
 export default function SponsorsSection() {
@@ -24,39 +37,7 @@ export default function SponsorsSection() {
 			})
 			.then((data) => {
 				const sponsorsData = Array.isArray(data) ? data : [];
-
-				const sortedSponsors = sponsorsData.sort((a, b) => {
-					const getAmount = (sponsor: Sponsor) => {
-						if (!sponsor.isOneTime && sponsor.monthlyDollars > 0) {
-							return sponsor.monthlyDollars;
-						}
-
-						if (sponsor.tierName) {
-							const match = sponsor.tierName.match(/\$(\d+(?:\.\d+)?)/);
-							return match ? Number.parseFloat(match[1]) : 0;
-						}
-
-						return 0;
-					};
-
-					if (a.monthlyDollars === -1 && b.monthlyDollars !== -1) return 1;
-					if (a.monthlyDollars !== -1 && b.monthlyDollars === -1) return -1;
-
-					if (a.monthlyDollars === -1 && b.monthlyDollars === -1) {
-						return (
-							new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-						);
-					}
-
-					const aIsMonthly = !a.isOneTime;
-					const bIsMonthly = !b.isOneTime;
-
-					if (aIsMonthly && !bIsMonthly) return -1;
-					if (!aIsMonthly && bIsMonthly) return 1;
-
-					return getAmount(b) - getAmount(a);
-				});
-
+				const sortedSponsors = sortSponsors(sponsorsData);
 				setSponsors(sortedSponsors);
 				setLoadingSponsors(false);
 			})
@@ -66,12 +47,13 @@ export default function SponsorsSection() {
 			});
 	}, []);
 
-	const currentSponsors = sponsors.filter(
-		(sponsor) => sponsor.monthlyDollars !== -1,
+	const currentSponsors = filterCurrentSponsors(sponsors);
+	const pastSponsors = filterPastSponsors(sponsors);
+
+	const specialSponsors = sortSpecialSponsors(
+		filterSpecialSponsors(currentSponsors),
 	);
-	const pastSponsors = sponsors.filter(
-		(sponsor) => sponsor.monthlyDollars === -1,
-	);
+	const regularSponsors = filterRegularSponsors(currentSponsors);
 
 	return (
 		<div className="mb-12">
@@ -133,19 +115,98 @@ export default function SponsorsSection() {
 				</div>
 			) : (
 				<div className="space-y-8">
-					{currentSponsors.length > 0 && (
+					{specialSponsors.length > 0 && (
 						<div className="space-y-4">
-							{/* <div className="flex items-center gap-2">
-								<span className="text-primary text-sm">▶</span>
-								<span className="font-semibold text-foreground text-sm">
-									ACTIVE_SPONSORS.SH
-								</span>
-								<span className="text-muted-foreground text-xs">
-									({currentSponsors.length})
-								</span>
-							</div> */}
 							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-								{currentSponsors.map((entry, index) => {
+								{specialSponsors.map((entry, index) => {
+									const since = new Date(entry.createdAt).toLocaleDateString(
+										undefined,
+										{ year: "numeric", month: "short" },
+									);
+									const sponsorUrl = getSponsorUrl(entry);
+
+									return (
+										<div
+											key={entry.sponsor.login}
+											className="rounded border border-border"
+											style={{ animationDelay: `${index * 50}ms` }}
+										>
+											<div className="border-border border-b px-3 py-2">
+												<div className="flex items-center gap-2">
+													<Star className="h-4 w-4 text-yellow-500/90" />
+													<div className="ml-auto flex items-center gap-2 text-muted-foreground text-xs">
+														<span>SPECIAL</span>
+														<span>•</span>
+														<span>SINCE {since.toUpperCase()}</span>
+													</div>
+												</div>
+											</div>
+											<div className="p-4">
+												<div className="flex gap-4">
+													<div className="flex-shrink-0">
+														<Image
+															src={
+																entry.sponsor.customLogoUrl ||
+																entry.sponsor.avatarUrl
+															}
+															alt={entry.sponsor.name || entry.sponsor.login}
+															width={100}
+															height={100}
+															className="rounded border border-border transition-colors duration-300"
+															unoptimized
+														/>
+													</div>
+													<div className="grid grid-cols-1 grid-rows-[1fr_auto] justify-between py-2">
+														<div>
+															<h3 className="truncate font-semibold text-foreground text-sm">
+																{entry.sponsor.name || entry.sponsor.login}
+															</h3>
+															{entry.tierName && (
+																<p className=" text-primary text-xs">
+																	{entry.tierName}
+																</p>
+															)}
+														</div>
+														<div className="flex flex-col gap-1">
+															<a
+																href={`https://github.com/${entry.sponsor.login}`}
+																target="_blank"
+																rel="noopener noreferrer"
+																className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
+															>
+																<Github className="h-4 w-4" />
+																<span className="truncate">
+																	{entry.sponsor.login}
+																</span>
+															</a>
+															{(entry.sponsor.websiteUrl ||
+																entry.sponsor.linkUrl) && (
+																<a
+																	href={sponsorUrl}
+																	target="_blank"
+																	rel="noopener noreferrer"
+																	className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
+																>
+																	<Globe className="h-4 w-4" />
+																	<span className="truncate">
+																		{formatSponsorUrl(sponsorUrl)}
+																	</span>
+																</a>
+															)}
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									);
+								})}
+							</div>
+						</div>
+					)}
+					{regularSponsors.length > 0 && (
+						<div className="space-y-4">
+							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+								{regularSponsors.map((entry, index) => {
 									const since = new Date(entry.createdAt).toLocaleDateString(
 										undefined,
 										{ year: "numeric", month: "short" },
@@ -160,16 +221,12 @@ export default function SponsorsSection() {
 												<div className="flex items-center gap-2">
 													<span className="text-primary text-xs">▶</span>
 													<div className="ml-auto flex items-center gap-2 text-muted-foreground text-xs">
-														<span>
-															{entry.isOneTime ? "ONE-TIME" : "MONTHLY"}
-														</span>
-														<span>•</span>
 														<span>SINCE {since.toUpperCase()}</span>
 													</div>
 												</div>
 											</div>
 											<div className="p-4">
-												<div className="flex items-center gap-4">
+												<div className="flex gap-4">
 													<div className="flex-shrink-0">
 														<Image
 															src={entry.sponsor.avatarUrl}
@@ -180,7 +237,7 @@ export default function SponsorsSection() {
 															unoptimized
 														/>
 													</div>
-													<div className="min-w-0 flex-1 space-y-2">
+													<div className="grid grid-cols-1 grid-rows-[1fr_auto] justify-between py-2">
 														<div>
 															<h3 className="truncate font-semibold text-foreground text-sm">
 																{entry.sponsor.name || entry.sponsor.login}
@@ -216,12 +273,10 @@ export default function SponsorsSection() {
 																>
 																	<Globe className="h-4 w-4" />
 																	<span className="truncate">
-																		{(
+																		{formatSponsorUrl(
 																			entry.sponsor.websiteUrl ||
-																			entry.sponsor.linkUrl
-																		)
-																			?.replace(/^https?:\/\//, "")
-																			?.replace(/\/$/, "")}
+																				entry.sponsor.linkUrl,
+																		)}
 																	</span>
 																</a>
 															)}
@@ -267,6 +322,9 @@ export default function SponsorsSection() {
 											undefined,
 											{ year: "numeric", month: "short" },
 										);
+										const wasSpecial = isSpecialSponsor(entry);
+										const sponsorUrl = getSponsorUrl(entry);
+
 										return (
 											<div
 												key={entry.sponsor.login}
@@ -275,29 +333,36 @@ export default function SponsorsSection() {
 											>
 												<div className="border-border/70 border-b px-3 py-2">
 													<div className="flex items-center gap-2">
-														<span className="text-muted-foreground text-xs">
-															◆
-														</span>
+														{wasSpecial ? (
+															<Star className="h-4 w-4 text-yellow-500/60" />
+														) : (
+															<span className="text-muted-foreground text-xs">
+																◆
+															</span>
+														)}
 														<div className="ml-auto flex items-center gap-2 text-muted-foreground text-xs">
-															<span>PAST</span>
-															<span>•</span>
+															{wasSpecial && <span>SPECIAL</span>}
+															{wasSpecial && <span>•</span>}
 															<span>SINCE {since.toUpperCase()}</span>
 														</div>
 													</div>
 												</div>
 												<div className="p-4">
-													<div className="flex items-center gap-4">
+													<div className="flex gap-4">
 														<div className="flex-shrink-0">
 															<Image
-																src={entry.sponsor.avatarUrl}
+																src={
+																	entry.sponsor.customLogoUrl ||
+																	entry.sponsor.avatarUrl
+																}
 																alt={entry.sponsor.name || entry.sponsor.login}
 																width={80}
 																height={80}
-																className="rounded border border-border/70 transition-colors duration-300"
+																className="rounded border border-border/70"
 																unoptimized
 															/>
 														</div>
-														<div className="min-w-0 flex-1 space-y-2">
+														<div className="grid grid-cols-1 grid-rows-[1fr_auto] justify-between">
 															<div>
 																<h3 className="truncate font-semibold text-muted-foreground text-sm">
 																	{entry.sponsor.name || entry.sponsor.login}
@@ -323,22 +388,14 @@ export default function SponsorsSection() {
 																{(entry.sponsor.websiteUrl ||
 																	entry.sponsor.linkUrl) && (
 																	<a
-																		href={
-																			entry.sponsor.websiteUrl ||
-																			entry.sponsor.linkUrl
-																		}
+																		href={sponsorUrl}
 																		target="_blank"
 																		rel="noopener noreferrer"
 																		className="group flex items-center gap-2 text-muted-foreground/70 text-xs transition-colors hover:text-muted-foreground"
 																	>
 																		<Globe className="h-4 w-4" />
 																		<span className="truncate">
-																			{(
-																				entry.sponsor.websiteUrl ||
-																				entry.sponsor.linkUrl
-																			)
-																				?.replace(/^https?:\/\//, "")
-																				?.replace(/\/$/, "")}
+																			{formatSponsorUrl(sponsorUrl)}
 																		</span>
 																	</a>
 																)}

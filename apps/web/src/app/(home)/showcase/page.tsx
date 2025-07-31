@@ -1,6 +1,7 @@
 "use client";
 
 import { Terminal } from "lucide-react";
+import Footer from "../_components/footer";
 import ShowcaseItem from "./_components/ShowcaseItem";
 
 const showcaseProjects = [
@@ -121,6 +122,7 @@ export default function ShowcasePage() {
 					</div>
 				</div>
 			</div>
+			<Footer />
 		</main>
 	);
 }
