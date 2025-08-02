@@ -2,19 +2,27 @@ export const dynamic = "force-static";
 
 import { RootProvider } from "fumadocs-ui/provider";
 import type { Metadata, Viewport } from "next";
-import { Poppins } from "next/font/google";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
-import { Toaster } from "@/components/ui/sonner";
+import SearchDialog from "@/components/search";
+import { cn } from "@/lib/utils";
 import "./global.css";
+import Providers from "@/components/providers";
 
-const poppins = Poppins({
+const geist = Geist({
 	subsets: ["latin"],
-	weight: ["400", "500", "600", "700", "800"],
+	weight: ["400", "500", "600", "700"],
+	variable: "--font-geist",
+});
+
+const geistMono = Geist_Mono({
+	subsets: ["latin"],
+	weight: ["400", "500", "600", "700"],
+	variable: "--font-geist-mono",
 });
 
 const ogImage =
-	"https://api.screenshothis.com/v1/screenshots/take?api_key=ss_live_NQJgRXqHcKPwnoMTuQmgiwLIGbVfihjpMyQhgsaMyNBHTyesvrxpYNXmdgcnxipc&url=https%3A%2F%2Fbetter-t-stack.dev%2F&width=1200&height=630&block_ads=true&block_cookie_banners=true&block_trackers=true&device_scale_factor=0.75&prefers_color_scheme=dark&is_cached=true";
+	"https://api.screenshothis.com/v1/screenshots/take?api_key=ss_live_NQJgRXqHcKPwnoMTuQmgiwLIGbVfihjpMyQhgsaMyNBHTyesvrxpYNXmdgcnxipc&url=https%3A%2F%2Fbetter-t-stack.dev%2F&width=1200&height=630&block_ads=true&block_cookie_banners=true&block_trackers=true&device_scale_factor=0.70&prefers_color_scheme=dark&is_cached=true&cache_key=bts";
 
 export const metadata: Metadata = {
 	title: "Better-T Stack",
@@ -99,10 +107,15 @@ export const viewport: Viewport = {
 
 export default function Layout({ children }: { children: ReactNode }) {
 	return (
-		<html lang="en" className={poppins.className} suppressHydrationWarning>
+		<html
+			lang="en"
+			className={cn(geist.variable, geistMono.variable, "font-sans")}
+			suppressHydrationWarning
+		>
 			<body>
 				<RootProvider
 					search={{
+						SearchDialog,
 						options: {
 							type: "static",
 						},
@@ -112,8 +125,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 						defaultTheme: "system",
 					}}
 				>
-					<NuqsAdapter>{children}</NuqsAdapter>
-					<Toaster />
+					<Providers>{children}</Providers>
 				</RootProvider>
 			</body>
 		</html>
