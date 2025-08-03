@@ -25,7 +25,7 @@ export async function writeBtsConfig(projectConfig: ProjectConfig) {
 	};
 
 	const baseContent = {
-		$schema: "https://better-t-stack.dev/schema.json",
+		$schema: "https://r2.better-t-stack.dev/schema.json",
 		version: btsConfig.version,
 		createdAt: btsConfig.createdAt,
 		database: btsConfig.database,

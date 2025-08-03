@@ -1,5 +1,7 @@
-import path from "node:path";
-import fs from "fs-extra";
+import { execSync } from "node:child_process";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
 	AddonsSchema,
 	APISchema,
@@ -28,7 +30,7 @@ const WEB_DEPLOY_VALUES = WebDeploySchema.options;
 
 const configSchema = {
 	$schema: "http://json-schema.org/draft-07/schema#",
-	$id: "https://better-t-stack.dev/schema.json",
+	$id: "https://r2.better-t-stack.dev/schema.json",
 	title: "Better-T-Stack Configuration",
 	description: "Configuration file for Better-T-Stack projects",
 	type: "object",
@@ -136,14 +138,34 @@ const configSchema = {
 };
 
 async function generateSchema() {
-	const schemaPath = path.join(process.cwd(), "public", "schema.json");
-	await fs.ensureDir(path.dirname(schemaPath));
-	await fs.writeFile(
-		schemaPath,
-		JSON.stringify(configSchema, null, 2),
-		"utf-8",
-	);
-	console.log("✅ Generated schema.json from shared types package");
+	try {
+		console.log("🔄 Generating schema...");
+
+		const tempDir = mkdtempSync(join(tmpdir(), "schema-"));
+		const tempFilePath = join(tempDir, "schema.json");
+
+		writeFileSync(tempFilePath, JSON.stringify(configSchema, null, 2));
+
+		console.log("📤 Uploading to Cloudflare R2...");
+
+		const BUCKET_NAME = "bucket";
+		const key = "schema.json";
+		const cmd = `npx wrangler r2 object put "${BUCKET_NAME}/${key}" --file="${tempFilePath}" --remote`;
+
+		console.log(`Uploading ${tempFilePath} to r2://${BUCKET_NAME}/${key} ...`);
+		try {
+			execSync(cmd, { stdio: "inherit" });
+		} catch (err) {
+			console.error("Failed to upload schema:", err);
+			throw err;
+		}
+
+		console.log("✅ Generated schema.json from shared types package");
+		console.log("📤 Uploaded to R2 bucket: bucket/schema.json");
+	} catch (error) {
+		console.error("❌ Error generating schema:", error);
+		process.exit(1);
+	}
 }
 
 generateSchema().catch(console.error);
