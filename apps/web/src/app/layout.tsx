@@ -1,5 +1,3 @@
-export const dynamic = "force-static";
-
 import { RootProvider } from "fumadocs-ui/provider";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";

@@ -9,10 +9,13 @@
 		"dev:web": "turbo run dev --filter=web",
 		"build:web": "turbo run build --filter=web",
 		"build:cli": "turbo run build --filter=create-better-t-stack",
+		"lint": "turbo lint",
 		"check": "turbo check",
 		"format": "biome check --write .",
 		"publish-packages": "turbo run build --filter=create-better-t-stack && changeset publish",
-		"deploy:web": "bun run --filter=web generate-analytics && bun run --filter=web generate-schema && vercel --prod"
+		"deploy:convex": "cd packages/backend && bunx convex deploy",
+		"deploy:web": "cd apps/web && vercel --prod",
+		"deploy": "bun run --filter=web generate-analytics && bun run --filter=web generate-schema && bun run deploy:convex && bun run deploy:web"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.2",

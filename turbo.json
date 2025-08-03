@@ -21,6 +21,10 @@
 		"deploy": {
 			"cache": false,
 			"persistent": true
+		},
+		"deploy:convex": {
+			"cache": false,
+			"persistent": true
 		}
 	}
 }
