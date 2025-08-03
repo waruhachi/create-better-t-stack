@@ -448,7 +448,6 @@ async function generateAnalyticsData() {
 			totalProjects: totalRecords,
 			avgProjectsPerDay: avgProjectsPerDay.toFixed(1),
 			lastUpdated: lastUpdated,
-			generatedAt: new Date().toISOString(),
 		};
 
 		// Write minimal file to public folder

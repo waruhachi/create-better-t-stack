@@ -3,7 +3,6 @@
 	"private": true,
 	"scripts": {
 		"build": "turbo build",
-		"dev": "turbo dev",
 		"dev:cli": "turbo run dev --filter=create-better-t-stack",
 		"cli": "cd apps/cli && node dist/index.js",
 		"dev:web": "turbo run dev --filter=web",
@@ -14,7 +13,7 @@
 		"format": "biome check --write .",
 		"publish-packages": "turbo run build --filter=create-better-t-stack && changeset publish",
 		"deploy:convex": "cd packages/backend && bunx convex deploy",
-		"deploy:web": "cd apps/web && vercel --prod",
+		"deploy:web": "vercel --prod",
 		"deploy": "bun run --filter=web generate-analytics && bun run --filter=web generate-schema && bun run deploy:convex && bun run deploy:web"
 	},
 	"devDependencies": {

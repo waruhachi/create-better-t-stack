@@ -5,8 +5,8 @@
 		"build": {
 			"dependsOn": ["^build"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
-			"env": ["PROD"],
-			"outputs": [".next/**", "!.next/cache/**", "dist/**", ".open-next/**"]
+			"env": ["PROD", "CONVEX_DEPLOY_KEY", "NEXT_PUBLIC_CONVEX_URL", "NEXT_PUBLIC_POSTHOG_KEY", "NEXT_PUBLIC_POSTHOG_HOST"],
+			"outputs": [".next/**", "!.next/cache/**"]
 		},
 		"lint": {
 			"dependsOn": ["^lint"]
