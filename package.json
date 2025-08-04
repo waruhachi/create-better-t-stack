@@ -13,10 +13,10 @@
 		"check": "turbo check",
 		"format": "biome check --write .",
 		"publish-packages": "turbo run build --filter=create-better-t-stack && changeset publish",
-		"deploy:convex": "cd packages/backend && bunx convex deploy",
+		"deploy:convex": "turbo run --filter=@better-t-stack/backend deploy",
 		"deploy:web": "bun run --filter=web deploy",
-		"generate": "bun run --filter=web generate-analytics && bun run --filter=web generate-schema",
-		"deploy": "bun run deploy:web && bun run deploy:convex"
+		"pre-deploy": "bun run --filter=web generate-analytics && bun run --filter=web generate-schema && bun run deploy:convex",
+		"deploy": "bun run deploy:web"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.1.2",
