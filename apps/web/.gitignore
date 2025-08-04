@@ -29,5 +29,6 @@ yarn-error.log*
 .vercel
 next-env.d.ts
 .dev.vars
+.dev.vars.prod
 
 analytics-data.json
