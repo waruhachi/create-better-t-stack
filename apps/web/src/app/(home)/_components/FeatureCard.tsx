@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
@@ -29,44 +29,46 @@ function TechIcon({
 	name: string;
 	className?: string;
 }) {
-	const [mounted, setMounted] = useState(false);
 	const { theme } = useTheme();
 
-	useEffect(() => {
-		setMounted(true);
-	}, []);
+	// If no icon, return empty
+	if (!icon) return null;
 
-	if (mounted && icon.startsWith("/icon/")) {
-		if (
-			theme === "light" &&
-			(icon.includes("drizzle") ||
-				icon.includes("prisma") ||
-				icon.includes("express"))
-		) {
-			icon = icon.replace(".svg", "-light.svg");
-		}
-
+	// If it's an emoji or text icon, render as span
+	if (!icon.startsWith("https://")) {
 		return (
-			<Image
-				src={icon}
-				alt={`${name} icon`}
-				width={24}
-				height={24}
-				className={cn("h-6 w-6 object-contain", className)}
-				unoptimized
-			/>
+			<span
+				className={cn(
+					"flex h-6 w-6 items-center justify-center text-2xl",
+					className,
+				)}
+			>
+				{icon}
+			</span>
 		);
 	}
 
+	// Handle light theme variants
+	let iconSrc = icon;
+	if (
+		theme === "light" &&
+		(icon.includes("drizzle") ||
+			icon.includes("prisma") ||
+			icon.includes("express"))
+	) {
+		iconSrc = icon.replace(".svg", "-light.svg");
+	}
+
+	// Render as image
 	return (
-		<span
-			className={cn(
-				"flex h-6 w-6 items-center justify-center text-2xl",
-				className,
-			)}
-		>
-			{icon}
-		</span>
+		<Image
+			src={iconSrc}
+			alt={`${name} icon`}
+			width={24}
+			height={24}
+			className={cn("h-6 w-6 object-contain", className)}
+			unoptimized
+		/>
 	);
 }
 

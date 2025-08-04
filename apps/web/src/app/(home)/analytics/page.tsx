@@ -24,7 +24,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import discordLogo from "@/public/icon/discord.svg";
+import discordIcon from "@/public/icon/discord.svg";
 import Footer from "../_components/footer";
 
 interface AggregatedAnalyticsData {
@@ -650,7 +650,7 @@ export default function AnalyticsPage() {
 						<div className="flex items-center justify-between p-3">
 							<div className="flex items-center gap-3">
 								<Image
-									src={discordLogo}
+									src={discordIcon}
 									alt="discord"
 									className="h-4 w-4 invert-0 dark:invert"
 								/>

@@ -9,6 +9,7 @@ const config = {
 		remotePatterns: [
 			{ protocol: "https", hostname: "pbs.twimg.com" },
 			{ protocol: "https", hostname: "abs.twimg.com" },
+			{ protocol: "https", hostname: "r2.better-t-stack.dev" },
 		],
 	},
 	outputFileTracingExcludes: {

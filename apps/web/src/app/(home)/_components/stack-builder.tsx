@@ -138,39 +138,37 @@ function TechIcon({
 	name: string;
 	className?: string;
 }) {
-	const [mounted, setMounted] = useState(false);
 	const { theme } = useTheme();
 
-	useEffect(() => {
-		setMounted(true);
-	}, []);
+	if (!icon) return null;
 
-	if (mounted && icon.startsWith("/icon/")) {
-		if (
-			theme === "light" &&
-			(icon.includes("drizzle") ||
-				icon.includes("prisma") ||
-				icon.includes("express"))
-		) {
-			icon = icon.replace(".svg", "-light.svg");
-		}
-
+	if (!icon.startsWith("https://")) {
 		return (
-			<Image
-				src={icon}
-				alt={`${name} icon`}
-				width={20}
-				height={20}
-				className={cn("inline-block", className)}
-				unoptimized
-			/>
+			<span className={cn("inline-flex items-center text-lg", className)}>
+				{icon}
+			</span>
 		);
 	}
 
+	let iconSrc = icon;
+	if (
+		theme === "light" &&
+		(icon.includes("drizzle") ||
+			icon.includes("prisma") ||
+			icon.includes("express"))
+	) {
+		iconSrc = icon.replace(".svg", "-light.svg");
+	}
+
 	return (
-		<span className={cn("inline-flex items-center text-lg", className)}>
-			{icon}
-		</span>
+		<Image
+			src={iconSrc}
+			alt={`${name} icon`}
+			width={20}
+			height={20}
+			className={cn("inline-block", className)}
+			unoptimized
+		/>
 	);
 }
 
@@ -1202,12 +1200,7 @@ const StackBuilder = () => {
 									<TechIcon
 										icon={tech.icon}
 										name={tech.name}
-										className={cn(
-											tech.icon.startsWith("/icon/")
-												? "h-3 w-3"
-												: "h-3 w-3 text-xs",
-											tech.className,
-										)}
+										className={cn("h-3 w-3", tech.className)}
 									/>
 								)}
 								{tech.name}
@@ -1236,9 +1229,7 @@ const StackBuilder = () => {
 							getBadgeColors(category),
 						)}
 					>
-						{tech.icon !== "" && (
-							<TechIcon icon={tech.icon} name={tech.name} className="h-3 w-3" />
-						)}
+						<TechIcon icon={tech.icon} name={tech.name} className="h-3 w-3" />
 						{tech.name}
 					</span>,
 				);
