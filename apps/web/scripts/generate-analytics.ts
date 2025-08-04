@@ -188,7 +188,7 @@ async function generateAnalyticsData() {
 							row["*.properties.examples.1"],
 						].filter(Boolean);
 						if (examples.length === 0) {
-							examplesCounts["none"] = (examplesCounts["none"] || 0) + 1;
+							examplesCounts.none = (examplesCounts.none || 0) + 1;
 						} else {
 							for (const example of examples) {
 								examplesCounts[example] = (examplesCounts[example] || 0) + 1;
@@ -205,7 +205,7 @@ async function generateAnalyticsData() {
 							row["*.properties.addons.5"],
 						].filter(Boolean);
 						if (addons.length === 0) {
-							addonsCounts["none"] = (addonsCounts["none"] || 0) + 1;
+							addonsCounts.none = (addonsCounts.none || 0) + 1;
 						} else {
 							for (const addon of addons) {
 								addonsCounts[addon] = (addonsCounts[addon] || 0) + 1;
@@ -354,7 +354,7 @@ async function generateAnalyticsData() {
 			monthlyTimeSeries: Object.entries(monthlyCounts)
 				.map(([month, count]) => ({
 					month,
-					displayMonth: new Date(month + "-01").toLocaleDateString("en-US", {
+					displayMonth: new Date(`${month}-01`).toLocaleDateString("en-US", {
 						month: "short",
 						year: "numeric",
 					}),
