@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@better-t-stack/backend": "workspace:*",
+    "@better-t-stack/types": "workspace:*",
     "@erquhart/convex-oss-stats": "^0.8.1",
     "@number-flow/react": "^0.5.10",
     "@opennextjs/cloudflare": "^1.6.3",
