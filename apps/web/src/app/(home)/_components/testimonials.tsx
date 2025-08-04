@@ -8,22 +8,22 @@ import { Tweet, TweetSkeleton, type TwitterComponents } from "react-tweet";
 
 const YOUTUBE_VIDEOS = [
 	{
-		id: "VIDEO_001",
+		embedId: "azhw_iq8SIA",
+		title: "This CLI Lets You Choose Your Entire Tech Stack Instantly",
+	},
+	{
 		embedId: "CWwkWJmT_zU",
 		title: "The BEST Way To Start a Project (Better-T-Stack)",
 	},
 	{
-		id: "VIDEO_002",
 		embedId: "MGmPTcgJYIo",
 		title: "This new CLI tool makes scaffolding projects easy",
 	},
 	{
-		id: "VIDEO_003",
 		embedId: "g-ynSAdL6Ak",
 		title: "This tool cured my JavaScript fatigue",
 	},
 	{
-		id: "VIDEO_004",
 		embedId: "uHUgw-Hi8HE",
 		title: "I tried React again after 2 years of Svelte",
 	},
@@ -164,7 +164,9 @@ export default function Testimonials() {
 				<div className="sticky top-0 z-10 border-border border-b px-2 py-2">
 					<div className="flex items-center gap-2">
 						<Play className="h-3 w-3 text-primary" />
-						<span className="font-semibold text-xs">[{video.id}]</span>
+						<span className="font-semibold text-xs">
+							[VIDEO_{String(index + 1).padStart(3, "0")}]
+						</span>
 					</div>
 				</div>
 				<div className="w-full min-w-0 overflow-hidden">
@@ -243,7 +245,11 @@ export default function Testimonials() {
 						animate="visible"
 					>
 						{YOUTUBE_VIDEOS.map((video, index) => (
-							<VideoCard key={video.id} video={video} index={index} />
+							<VideoCard
+								key={`video-${video.embedId}`}
+								video={video}
+								index={index}
+							/>
 						))}
 					</motion.div>
 				</div>
@@ -256,7 +262,11 @@ export default function Testimonials() {
 						animate="visible"
 					>
 						{YOUTUBE_VIDEOS.map((video, index) => (
-							<VideoCard key={video.id} video={video} index={index} />
+							<VideoCard
+								key={`video-${video.embedId}`}
+								video={video}
+								index={index}
+							/>
 						))}
 					</motion.div>
 				</div>
