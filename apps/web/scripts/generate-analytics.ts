@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import Papa from "papaparse";
@@ -450,27 +450,23 @@ async function generateAnalyticsData() {
 			lastUpdated: lastUpdated,
 		};
 
-		// Write minimal file to public folder
-		const publicDir = join(process.cwd(), "public");
-		if (!existsSync(publicDir)) {
-			mkdirSync(publicDir, { recursive: true });
-		}
-		const minimalFilePath = join(publicDir, "analytics-minimal.json");
-		writeFileSync(
-			minimalFilePath,
-			JSON.stringify(minimalAnalyticsData, null, 2),
-		);
-
 		console.log("📤 Uploading to Cloudflare R2...");
 
 		const tempDir = mkdtempSync(join(tmpdir(), "analytics-"));
 		const tempFilePath = join(tempDir, "analytics-data.json");
+		const minimalTempFilePath = join(tempDir, "analytics-minimal.json");
 
 		writeFileSync(tempFilePath, JSON.stringify(analyticsData, null, 2));
+		writeFileSync(
+			minimalTempFilePath,
+			JSON.stringify(minimalAnalyticsData, null, 2),
+		);
 
 		const BUCKET_NAME = "bucket";
 		const key = "analytics-data.json";
+		const minimalKey = "analytics-minimal.json";
 		const cmd = `npx wrangler r2 object put "${BUCKET_NAME}/${key}" --file="${tempFilePath}" --remote`;
+		const minimalCmd = `npx wrangler r2 object put "${BUCKET_NAME}/${minimalKey}" --file="${minimalTempFilePath}" --remote`;
 
 		console.log(`Uploading ${tempFilePath} to r2://${BUCKET_NAME}/${key} ...`);
 		try {
@@ -481,10 +477,20 @@ async function generateAnalyticsData() {
 		}
 
 		console.log(
+			`Uploading ${minimalTempFilePath} to r2://${BUCKET_NAME}/${minimalKey} ...`,
+		);
+		try {
+			execSync(minimalCmd, { stdio: "inherit" });
+		} catch (err) {
+			console.error("Failed to upload minimal analytics data:", err);
+			throw err;
+		}
+
+		console.log(
 			`✅ Generated optimized analytics data with ${totalRecords} records`,
 		);
 		console.log(
-			"📁 Created minimal analytics file: public/analytics-minimal.json",
+			"📁 Uploaded minimal analytics file to R2: bucket/analytics-minimal.json",
 		);
 		console.log("📤 Uploaded to R2 bucket: bucket/analytics-data.json");
 		console.log(`🕒 Last data update: ${lastUpdated}`);
