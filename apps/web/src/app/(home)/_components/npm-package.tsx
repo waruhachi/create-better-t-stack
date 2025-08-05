@@ -1,15 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
 
 const NpmPackage = () => {
-	const [version, setVersion] = useState("");
-	const [versionLoading, setVersionLoading] = useState(true);
+	const [version, setVersion] = useState("0.0.0");
 
 	useEffect(() => {
 		const getLatestVersion = async () => {
-			setVersionLoading(true);
 			try {
 				const res = await fetch(
 					"https://api.github.com/repos/AmanVarshney01/create-better-t-stack/releases",
@@ -21,8 +18,6 @@ const NpmPackage = () => {
 			} catch (error) {
 				console.error("Error fetching NPM version:", error);
 				setVersion("?.?.?");
-			} finally {
-				setVersionLoading(false);
 			}
 		};
 		getLatestVersion();
@@ -30,15 +25,8 @@ const NpmPackage = () => {
 
 	return (
 		<div className="mt-2 flex items-center justify-center">
-			<span
-				className={cn(
-					"mr-2 inline-block h-5 w-3 bg-primary",
-					versionLoading && "animate-pulse",
-				)}
-			/>
-			<span className=" text-muted-foreground text-xl">
-				{versionLoading ? "[v?.?.?]" : `[v${version}]`}
-			</span>
+			<span className="mr-2 inline-block h-5 w-3 bg-primary" />
+			<span className="text-muted-foreground text-xl">[v{version}]</span>
 		</div>
 	);
 };
