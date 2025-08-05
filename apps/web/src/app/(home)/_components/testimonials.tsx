@@ -49,12 +49,15 @@ const TWEET_IDS = [
 	"1949912886958301546",
 	"1942558041704182158",
 	"1947636576118304881",
+	"1951704580691304693",
 	"1937383786637094958",
 	"1931709370003583004",
 	"1929147326955704662",
 	"1948050877454938549",
+	"1951599045383770386",
 	"1904228496144269699",
 	"1949851365435469889",
+	"1950457707632214136",
 	"1930257410259616057",
 	"1937258706279817570",
 	"1917815700980391964",
@@ -62,6 +65,7 @@ const TWEET_IDS = [
 	"1947812547551498466",
 	"1928317790588403953",
 	"1917640304758514093",
+	"1951703990896570459",
 	"1907831059275735353",
 	"1912924558522524039",
 	"1945054982870282575",
@@ -70,6 +74,7 @@ const TWEET_IDS = [
 	"1911490975173607495",
 	"1930104047845158972",
 	"1913773945523953713",
+	"1951540684340469950",
 	"1944937093387706572",
 	"1904241046898556970",
 	"1913834145471672652",
@@ -109,8 +114,24 @@ const TWEET_IDS = [
 ];
 
 export const components: TwitterComponents = {
-	AvatarImg: (props) => <Image {...props} alt={props.alt} unoptimized />,
-	MediaImg: (props) => <Image {...props} alt={props.alt} fill unoptimized />,
+	AvatarImg: (props) => {
+		if (!props.src || props.src === "") {
+			return (
+				<div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted" />
+			);
+		}
+		return <Image {...props} alt={props.alt || "User avatar"} unoptimized />;
+	},
+	MediaImg: (props) => {
+		if (!props.src || props.src === "") {
+			return (
+				<div className="flex h-32 w-full items-center justify-center rounded bg-muted" />
+			);
+		}
+		return (
+			<Image {...props} alt={props.alt || "Media content"} fill unoptimized />
+		);
+	},
 };
 
 export default function Testimonials() {
