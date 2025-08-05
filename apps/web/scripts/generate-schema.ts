@@ -14,7 +14,7 @@ import {
 	PackageManagerSchema,
 	RuntimeSchema,
 	WebDeploySchema,
-} from "@better-t-stack/types";
+} from "../../cli/src/types";
 
 const DATABASE_VALUES = DatabaseSchema.options;
 const ORM_VALUES = ORMSchema.options;
