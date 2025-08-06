@@ -1,4 +1,4 @@
-{{#if (includes frontend "nuxt")}}
+{{#if (or (includes frontend "nuxt") (includes frontend "native-nativewind"))}}
 # [install]
 # linker = "isolated"
 {{else}}

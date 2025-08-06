@@ -8,22 +8,31 @@ import { Tweet, TweetSkeleton, type TwitterComponents } from "react-tweet";
 
 const YOUTUBE_VIDEOS = [
 	{
-		id: "VIDEO_001",
+		embedId: "VL6zJH6z8wY",
+		title: "Advanced Vibe Coding - setup for new projects",
+	},
+	{
+		embedId: "cdivzGRhsYk",
+		title:
+			"MY UPGRADED AI Coding Workflow + Free APIs: How I DO AI Coding! (Stitch, Better T3, SuperNinja)",
+	},
+	{
+		embedId: "azhw_iq8SIA",
+		title: "This CLI Lets You Choose Your Entire Tech Stack Instantly",
+	},
+	{
 		embedId: "CWwkWJmT_zU",
 		title: "The BEST Way To Start a Project (Better-T-Stack)",
 	},
 	{
-		id: "VIDEO_002",
 		embedId: "MGmPTcgJYIo",
 		title: "This new CLI tool makes scaffolding projects easy",
 	},
 	{
-		id: "VIDEO_003",
 		embedId: "g-ynSAdL6Ak",
 		title: "This tool cured my JavaScript fatigue",
 	},
 	{
-		id: "VIDEO_004",
 		embedId: "uHUgw-Hi8HE",
 		title: "I tried React again after 2 years of Svelte",
 	},
@@ -49,12 +58,15 @@ const TWEET_IDS = [
 	"1949912886958301546",
 	"1942558041704182158",
 	"1947636576118304881",
+	"1951704580691304693",
 	"1937383786637094958",
 	"1931709370003583004",
 	"1929147326955704662",
 	"1948050877454938549",
+	"1951599045383770386",
 	"1904228496144269699",
 	"1949851365435469889",
+	"1950457707632214136",
 	"1930257410259616057",
 	"1937258706279817570",
 	"1917815700980391964",
@@ -62,6 +74,7 @@ const TWEET_IDS = [
 	"1947812547551498466",
 	"1928317790588403953",
 	"1917640304758514093",
+	"1951703990896570459",
 	"1907831059275735353",
 	"1912924558522524039",
 	"1945054982870282575",
@@ -70,6 +83,7 @@ const TWEET_IDS = [
 	"1911490975173607495",
 	"1930104047845158972",
 	"1913773945523953713",
+	"1951540684340469950",
 	"1944937093387706572",
 	"1904241046898556970",
 	"1913834145471672652",
@@ -109,8 +123,24 @@ const TWEET_IDS = [
 ];
 
 export const components: TwitterComponents = {
-	AvatarImg: (props) => <Image {...props} alt={props.alt} unoptimized />,
-	MediaImg: (props) => <Image {...props} alt={props.alt} fill unoptimized />,
+	AvatarImg: (props) => {
+		if (!props.src || props.src === "") {
+			return (
+				<div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted" />
+			);
+		}
+		return <Image {...props} alt={props.alt || "User avatar"} unoptimized />;
+	},
+	MediaImg: (props) => {
+		if (!props.src || props.src === "") {
+			return (
+				<div className="flex h-32 w-full items-center justify-center rounded bg-muted" />
+			);
+		}
+		return (
+			<Image {...props} alt={props.alt || "Media content"} fill unoptimized />
+		);
+	},
 };
 
 export default function Testimonials() {
@@ -161,10 +191,12 @@ export default function Testimonials() {
 			}}
 		>
 			<div className="w-full min-w-0 overflow-hidden rounded border border-border">
-				<div className="sticky top-0 z-10 border-border border-b px-3 py-2">
+				<div className="sticky top-0 z-10 border-border border-b px-2 py-2">
 					<div className="flex items-center gap-2">
 						<Play className="h-3 w-3 text-primary" />
-						<span className="font-semibold text-xs">[{video.id}]</span>
+						<span className="font-semibold text-xs">
+							[VIDEO_{String(index + 1).padStart(3, "0")}]
+						</span>
 					</div>
 				</div>
 				<div className="w-full min-w-0 overflow-hidden">
@@ -211,7 +243,7 @@ export default function Testimonials() {
 				<div className="w-full min-w-0 overflow-hidden">
 					<div style={{ width: "100%", minWidth: 0, maxWidth: "100%" }}>
 						<Suspense fallback={<TweetSkeleton />}>
-							<Tweet id={tweetId} />
+							<Tweet id={tweetId} components={components} />
 						</Suspense>
 					</div>
 				</div>
@@ -243,7 +275,11 @@ export default function Testimonials() {
 						animate="visible"
 					>
 						{YOUTUBE_VIDEOS.map((video, index) => (
-							<VideoCard key={video.id} video={video} index={index} />
+							<VideoCard
+								key={`video-${video.embedId}`}
+								video={video}
+								index={index}
+							/>
 						))}
 					</motion.div>
 				</div>
@@ -256,7 +292,11 @@ export default function Testimonials() {
 						animate="visible"
 					>
 						{YOUTUBE_VIDEOS.map((video, index) => (
-							<VideoCard key={video.id} video={video} index={index} />
+							<VideoCard
+								key={`video-${video.embedId}`}
+								video={video}
+								index={index}
+							/>
 						))}
 					</motion.div>
 				</div>

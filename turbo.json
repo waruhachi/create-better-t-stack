@@ -4,9 +4,8 @@
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
-			"inputs": ["$TURBO_DEFAULT$", ".env*"],
-			"env": ["PROD"],
-			"outputs": [".next/**", "!.next/cache/**", "dist/**", ".open-next/**"]
+			"inputs": ["$TURBO_DEFAULT$"],
+			"outputs": [".next/**", "!.next/cache/**"]
 		},
 		"lint": {
 			"dependsOn": ["^lint"]
@@ -19,6 +18,10 @@
 			"persistent": true
 		},
 		"deploy": {
+			"cache": false,
+			"persistent": true
+		},
+		"deploy:convex": {
 			"cache": false,
 			"persistent": true
 		}

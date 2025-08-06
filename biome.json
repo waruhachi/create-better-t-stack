@@ -17,8 +17,9 @@
 			"!**/templates/**",
 			"!**/.turbo",
 			"!**/package.json",
-			"!**/analytics-data.json",
-			"!**/schema.json"
+			"!**/analytics-minimal.json",
+			"!**/schema.json",
+			"!**/_generated/**"
 		]
 	},
 	"formatter": {

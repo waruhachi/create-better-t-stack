@@ -33,13 +33,14 @@ export async function generateStaticParams() {
 	return source.generateParams();
 }
 
-export async function generateMetadata(props: {
+export async function generateMetadata({
+	params,
+}: {
 	params: Promise<{ slug?: string[] }>;
 }) {
-	const params = await props.params;
-	const page = source.getPage(params.slug);
+	const { slug = [] } = await params;
+	const page = source.getPage(slug);
 	if (!page) notFound();
-
 	return {
 		title: page.data.title,
 		description: page.data.description,

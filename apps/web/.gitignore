@@ -5,6 +5,7 @@
 .contentlayer
 .content-collections
 .source
+public/analytics-minimal.json
 
 # test & build
 /coverage
@@ -29,5 +30,4 @@ yarn-error.log*
 .vercel
 next-env.d.ts
 .dev.vars
-
-analytics-data.json
+.dev.vars.prod
