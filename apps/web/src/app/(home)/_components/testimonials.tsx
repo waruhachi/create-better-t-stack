@@ -12,7 +12,7 @@ const YOUTUBE_VIDEOS = [
 		title: "Advanced Vibe Coding - setup for new projects",
 	},
 	{
-		embedId: "cdivzGRhsYk&t=328s",
+		embedId: "cdivzGRhsYk",
 		title:
 			"MY UPGRADED AI Coding Workflow + Free APIs: How I DO AI Coding! (Stitch, Better T3, SuperNinja)",
 	},
