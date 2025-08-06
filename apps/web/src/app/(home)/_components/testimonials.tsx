@@ -8,6 +8,15 @@ import { Tweet, TweetSkeleton, type TwitterComponents } from "react-tweet";
 
 const YOUTUBE_VIDEOS = [
 	{
+		embedId: "VL6zJH6z8wY",
+		title: "Advanced Vibe Coding - setup for new projects",
+	},
+	{
+		embedId: "cdivzGRhsYk&t=328s",
+		title:
+			"MY UPGRADED AI Coding Workflow + Free APIs: How I DO AI Coding! (Stitch, Better T3, SuperNinja)",
+	},
+	{
 		embedId: "azhw_iq8SIA",
 		title: "This CLI Lets You Choose Your Entire Tech Stack Instantly",
 	},
