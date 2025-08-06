@@ -176,7 +176,7 @@ export const TECH_OPTIONS: Record<
 		{
 			id: "next",
 			name: "Next.js",
-			description: "App Router and API Routes",
+			description: "App Router & API (separate from frontend)",
 			icon: `${ICON_BASE_URL}/nextjs.svg`,
 			color: "from-gray-700 to-black",
 		},
