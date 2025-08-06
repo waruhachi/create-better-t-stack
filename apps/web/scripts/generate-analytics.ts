@@ -59,7 +59,51 @@ async function generateAnalyticsData() {
 		console.log("🔄 Fetching analytics data...");
 
 		const response = await fetch("https://r2.amanv.dev/export.csv");
-		const csvText = await response.text();
+		let csvText = await response.text();
+
+		// Fix malformed CSV data - if it's all on one line, try to split it properly
+		if (!csvText.includes("\n") || csvText.split("\n").length < 3) {
+			console.log("⚠️  Detected malformed CSV data, attempting to fix...");
+
+			// Try to split by common patterns that indicate row boundaries
+			const possibleSplitters = [
+				/\s{3,}/, // 3 or more spaces
+				/\s{2,}0{8,}/, // 2+ spaces followed by 8+ zeros (UUID pattern)
+				/\s{2,}[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/, // UUID pattern
+			];
+
+			for (const splitter of possibleSplitters) {
+				const parts = csvText.split(splitter);
+				if (parts.length > 2) {
+					console.log(`✅ Fixed CSV using pattern: ${splitter}`);
+					csvText = parts.join("\n");
+					break;
+				}
+			}
+
+			// If still malformed, try manual parsing
+			if (!csvText.includes("\n") || csvText.split("\n").length < 3) {
+				console.log("⚠️  CSV still malformed, attempting manual parsing...");
+
+				// Extract header and data manually
+				const headerMatch = csvText.match(/^([^,]+(?:,[^,]+)*)/);
+				if (headerMatch) {
+					const header = headerMatch[1];
+					const dataPart = csvText.substring(header.length);
+
+					// Split data by UUID patterns
+					const dataRows = dataPart
+						.split(
+							/\s{2,}[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/,
+						)
+						.filter((row) => row.trim().length > 0)
+						.map((row) => row.trim());
+
+					csvText = header + "\n" + dataRows.join("\n");
+					console.log(`✅ Manually parsed ${dataRows.length} rows`);
+				}
+			}
+		}
 
 		console.log("📊 Processing CSV data...");
 
@@ -90,16 +134,43 @@ async function generateAnalyticsData() {
 
 		Papa.parse<CSVRow>(csvText, {
 			header: true,
+			skipEmptyLines: true,
 			complete: (results) => {
 				try {
-					results.data.forEach((row) => {
-						const timestamp = row["*.timestamp"] || new Date().toISOString();
+					console.log("📈 Processing", results.data.length, "rows...");
+					console.log(
+						"📋 Sample row keys:",
+						Object.keys(results.data[0] || {}),
+					);
+
+					results.data.forEach((row, index) => {
+						// Skip rows that don't have essential data
+						if (!row["*.timestamp"] && !row["timestamp"]) {
+							if (index < 5) {
+								console.log(
+									`⚠️  Skipping row ${index} - no timestamp:`,
+									Object.keys(row),
+								);
+							}
+							return;
+						}
+
+						const timestamp =
+							row["*.timestamp"] ||
+							row["timestamp"] ||
+							new Date().toISOString();
 						const date = timestamp.includes("T")
 							? timestamp.split("T")[0]
 							: timestamp.split(" ")[0];
 
 						// Skip invalid records
 						if (!date || row["*.properties.platform"] === "unknown") {
+							if (index < 5) {
+								console.log(
+									`⚠️  Skipping row ${index} - invalid date or platform:`,
+									{ date, platform: row["*.properties.platform"] },
+								);
+							}
 							return;
 						}
 
@@ -113,6 +184,7 @@ async function generateAnalyticsData() {
 							const monthKey = `${timestampDate.getFullYear()}-${String(timestampDate.getMonth() + 1).padStart(2, "0")}`;
 							monthlyCounts[monthKey] = (monthlyCounts[monthKey] || 0) + 1;
 
+							// Use UTC hours for consistent timezone handling
 							const hour = timestampDate.getUTCHours();
 							hourlyCounts[hour] = (hourlyCounts[hour] || 0) + 1;
 						}
@@ -250,6 +322,15 @@ async function generateAnalyticsData() {
 							dbORMComboCounts[combo] = (dbORMComboCounts[combo] || 0) + 1;
 						}
 					});
+
+					console.log(
+						"✅ Successfully processed",
+						totalRecords,
+						"valid records",
+					);
+					console.log("📊 Platform distribution:", platformCounts);
+					console.log("📊 Backend distribution:", backendCounts);
+					console.log("📊 Database distribution:", databaseCounts);
 				} catch (error) {
 					console.error("Error parsing CSV:", error);
 				}

@@ -93,6 +93,10 @@ const platformConfig = {
 		label: "Windows",
 		color: "hsl(var(--chart-3))",
 	},
+	android: {
+		label: "Android", // there are 2 records with this platform :)
+		color: "hsl(var(--chart-4))",
+	},
 } satisfies ChartConfig;
 
 const packageManagerConfig = {
@@ -946,7 +950,11 @@ export default function AnalyticsPage() {
 															? "hsl(var(--chart-1))"
 															: entry.name === "linux"
 																? "hsl(var(--chart-2))"
-																: "hsl(var(--chart-3))"
+																: entry.name === "win32"
+																	? "hsl(var(--chart-3))"
+																	: entry.name === "android"
+																		? "hsl(var(--chart-4))"
+																		: "hsl(var(--chart-5))"
 													}
 												/>
 											))}
