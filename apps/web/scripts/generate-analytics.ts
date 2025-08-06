@@ -99,7 +99,7 @@ async function generateAnalyticsData() {
 						.filter((row) => row.trim().length > 0)
 						.map((row) => row.trim());
 
-					csvText = header + "\n" + dataRows.join("\n");
+					csvText = `${header}\n${dataRows.join("\n")}`;
 					console.log(`✅ Manually parsed ${dataRows.length} rows`);
 				}
 			}
@@ -145,7 +145,7 @@ async function generateAnalyticsData() {
 
 					results.data.forEach((row, index) => {
 						// Skip rows that don't have essential data
-						if (!row["*.timestamp"] && !row["timestamp"]) {
+						if (!row["*.timestamp"] && !row.timestamp) {
 							if (index < 5) {
 								console.log(
 									`⚠️  Skipping row ${index} - no timestamp:`,
@@ -156,9 +156,7 @@ async function generateAnalyticsData() {
 						}
 
 						const timestamp =
-							row["*.timestamp"] ||
-							row["timestamp"] ||
-							new Date().toISOString();
+							row["*.timestamp"] || row.timestamp || new Date().toISOString();
 						const date = timestamp.includes("T")
 							? timestamp.split("T")[0]
 							: timestamp.split(" ")[0];
