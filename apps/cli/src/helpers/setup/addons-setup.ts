@@ -8,6 +8,7 @@ import { addPackageDependency } from "../../utils/add-package-deps";
 import { getPackageExecutionCommand } from "../../utils/package-runner";
 import { setupFumadocs } from "./fumadocs-setup";
 import { setupStarlight } from "./starlight-setup";
+import { setupT3Env } from "./t3env-setup";
 import { setupTauri } from "./tauri-setup";
 import { setupUltracite } from "./ultracite-setup";
 import { addPwaToViteConfig } from "./vite-pwa-setup";
@@ -57,6 +58,11 @@ ${pc.cyan("Docs:")} ${pc.underline("https://turborepo.com/docs")}
 	) {
 		await setupTauri(config);
 	}
+
+	if (addons.includes("t3env")) {
+		await setupT3Env(config);
+	}
+
 	const hasUltracite = addons.includes("ultracite");
 	const hasBiome = addons.includes("biome");
 	const hasHusky = addons.includes("husky");

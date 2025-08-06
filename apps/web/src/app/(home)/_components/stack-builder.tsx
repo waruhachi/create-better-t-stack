@@ -1004,6 +1004,7 @@ const generateCommand = (stackState: StackState): string => {
 					"ultracite",
 					"fumadocs",
 					"oxlint",
+					"t3env",
 				].includes(addon),
 			);
 			if (validAddons.length > 0) {

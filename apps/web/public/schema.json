@@ -96,6 +96,7 @@
           "fumadocs",
           "ultracite",
           "oxlint",
+          "t3env",
           "none"
         ]
       },

@@ -15,7 +15,7 @@ export const DEFAULT_CONFIG: ProjectConfig = {
 	database: "sqlite",
 	orm: "drizzle",
 	auth: true,
-	addons: ["turborepo"],
+	addons: ["turborepo", "t3env"],
 	examples: [],
 	git: true,
 	packageManager: getUserPkgManager(),
@@ -123,6 +123,11 @@ export const dependencyVersionMap = {
 	"@opennextjs/cloudflare": "^1.3.0",
 	"nitro-cloudflare-dev": "^0.2.2",
 	"@sveltejs/adapter-cloudflare": "^7.0.4",
+
+	zod: "^4.0.14",
+	"@t3-oss/env-core": "^0.13.8",
+	"@t3-oss/env-nextjs": "^0.13.8",
+	"@t3-oss/env-nuxt": "^0.13.8",
 } as const;
 
 export type AvailableDependencies = keyof typeof dependencyVersionMap;
@@ -137,6 +142,7 @@ export const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
 	ultracite: [],
 	oxlint: [],
 	fumadocs: [],
+	t3env: [],
 	none: [],
 } as const;
 

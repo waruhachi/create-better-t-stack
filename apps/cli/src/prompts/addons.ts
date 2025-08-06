@@ -54,6 +54,10 @@ function getAddonDisplay(addon: Addons): { label: string; hint: string } {
 			label = "Fumadocs";
 			hint = "Build excellent documentation site";
 			break;
+		case "t3env":
+			label = "T3 Env";
+			hint = "Type-safe environment variables";
+			break;
 		default:
 			label = addon;
 			hint = `Add ${addon}`;
@@ -65,7 +69,7 @@ function getAddonDisplay(addon: Addons): { label: string; hint: string } {
 const ADDON_GROUPS = {
 	Documentation: ["starlight", "fumadocs"],
 	Linting: ["biome", "oxlint", "ultracite"],
-	Other: ["turborepo", "pwa", "tauri", "husky"],
+	Other: ["turborepo", "pwa", "tauri", "husky", "t3env"],
 };
 
 export async function getAddonsChoice(

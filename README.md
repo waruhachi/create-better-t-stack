@@ -26,7 +26,7 @@ pnpm create better-t-stack@latest
 ## Features
 
 - **Zero-config setup** with interactive CLI wizard
-- **End-to-end type safety** from database to frontend via tRPC
+- **End-to-end type safety** from database to frontend via tRPC and T3 Env
 - **Modern stack** with React, Hono/Elysia, and TanStack libraries
 - **Multi-platform** supporting web, mobile (Expo), and desktop applications
 - **Database flexibility** with SQLite (Turso) or PostgreSQL options

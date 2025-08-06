@@ -200,11 +200,12 @@ npx create-better-t-stack@latest .
 - `biome` - Biome linter/formatter
 - `husky` - Git hooks with Husky
 - `starlight` - Documentation site
+- `t3env` - Type-safe environment variables
 - `none` - No addons
 
 **Examples:**
 ```bash
---addons turborepo pwa
+--addons turborepo pwa t3env
 --addons biome husky
 --addons none
 ```
@@ -393,7 +394,7 @@ npx create-better-t-stack@latest my-webapp \
   --api trpc \
   --auth \
   --db-setup neon \
-  --addons pwa turborepo \
+  --addons pwa turborepo t3env \
   --examples todo ai
 ```
 
@@ -407,7 +408,7 @@ npx create-better-t-stack@latest my-mobile-app \
   --orm drizzle \
   --auth \
   --db-setup turso \
-  --addons turborepo
+  --addons turborepo t3env
 ```
 
 ### Cloudflare Workers Project
