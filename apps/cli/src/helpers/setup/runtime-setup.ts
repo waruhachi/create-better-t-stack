@@ -133,7 +133,7 @@ async function setupWorkersRuntime(serverDir: string) {
 	await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
 
 	await addPackageDependency({
-		devDependencies: ["wrangler"],
+		devDependencies: ["wrangler", "@types/node"],
 		projectDir: serverDir,
 	});
 }
