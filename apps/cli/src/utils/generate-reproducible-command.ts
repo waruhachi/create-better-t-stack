@@ -34,15 +34,15 @@ export function generateReproducibleCommand(config: ProjectConfig): string {
 	flags.push(`--package-manager ${config.packageManager}`);
 	flags.push(config.install ? "--install" : "--no-install");
 
-	let baseCommand = "";
+	let baseCommand = "npx create-better-t-stack@latest";
 	const pkgManager = config.packageManager;
 
-	if (pkgManager === "npm") {
-		baseCommand = "npx create-better-t-stack@latest";
+	if (pkgManager === "bun") {
+		baseCommand = "bun create better-t-stack@latest";
 	} else if (pkgManager === "pnpm") {
 		baseCommand = "pnpm create better-t-stack@latest";
-	} else if (pkgManager === "bun") {
-		baseCommand = "bun create better-t-stack@latest";
+	} else if (pkgManager === "npm") {
+		baseCommand = "npx create-better-t-stack@latest";
 	}
 
 	const projectPathArg = config.relativePath ? ` ${config.relativePath}` : "";
