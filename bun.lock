@@ -14,7 +14,7 @@
     },
     "apps/cli": {
       "name": "create-better-t-stack",
-      "version": "2.29.3",
+      "version": "2.30.0",
       "bin": {
         "create-better-t-stack": "dist/index.js",
       },
@@ -49,6 +49,7 @@
         "@opennextjs/cloudflare": "^1.6.3",
         "@orama/orama": "^3.1.11",
         "@radix-ui/react-dropdown-menu": "^2.1.15",
+        "@radix-ui/react-hover-card": "^1.1.14",
         "babel-plugin-react-compiler": "^19.1.0-rc.2",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",

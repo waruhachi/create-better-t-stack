@@ -162,6 +162,8 @@
 }
 
 :root {
+	--color-fd-primary: #8839ef;
+	--color-fd-primary-foreground: #ffffff;
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.44 0.04 279.33);
 	--card: oklch(1 0 0);
@@ -227,6 +229,8 @@
 }
 
 .dark {
+	--color-fd-primary: #cba6f7;
+	--color-fd-primary-foreground: #11111b;
 	--background: #11111b;
 	--foreground: #cdd6f4;
 	--card: #11111b;

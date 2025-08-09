@@ -7,7 +7,7 @@ import { source } from "@/lib/source";
 const docsOptions: DocsLayoutProps = {
 	...baseOptions,
 	tree: source.pageTree,
-	links: [],
+	// links: [],
 	sidebar: {
 		banner: <SpecialSponsorBanner />,
 	},

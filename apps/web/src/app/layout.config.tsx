@@ -20,7 +20,7 @@ export const links: LinkItemType[] = [
 	{
 		text: "Docs",
 		url: "/docs",
-		active: "nested-url" as const,
+		active: "nested-url",
 	},
 	{
 		text: "Builder",
