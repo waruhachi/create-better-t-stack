@@ -1,7 +1,5 @@
 {
 	"title": "Guides",
-	"defaultOpen": true,
-	"pages": [
-		"index"
-	]
+	"defaultOpen": false,
+	"pages": ["index"]
 }

@@ -1477,7 +1477,7 @@ const StackBuilder = () => {
 			<div className="grid w-full grid-cols-1 overflow-hidden border-border text-foreground sm:grid-cols-[auto_1fr]">
 				<div className="flex w-full flex-col border-border border-r sm:max-w-3xs md:max-w-xs lg:max-w-sm">
 					<ScrollArea className="flex-1">
-						<div className="grid h-full grid-rows-[auto_1fr] justify-between p-3 sm:p-4 md:h-[calc(100vh-64px)]">
+						<div className="grid h-full grid-rows-[auto_1fr] justify-between gap-2 p-3 sm:p-4 md:h-[calc(100vh-64px)]">
 							<div className="flex flex-col space-y-3 sm:space-y-4">
 								<label className="flex flex-col">
 									<span className="mb-1 text-muted-foreground text-xs">
