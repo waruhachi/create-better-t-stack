@@ -1,5 +1,9 @@
 {
 	"title": "CLI",
 	"defaultOpen": true,
-	"pages": ["index", "init", "add", "builder", "docs", "sponsors"]
+	"pages": [
+		"index",
+		"options",
+		"compatibility"
+	]
 }

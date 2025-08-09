@@ -2,6 +2,7 @@
 	"pages": [
 		"index",
 		"cli",
+		"guides",
 		"project-structure",
 		"bts-config",
 		"analytics",
