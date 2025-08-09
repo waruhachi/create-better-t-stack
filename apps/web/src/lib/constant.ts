@@ -470,6 +470,14 @@ export const TECH_OPTIONS: Record<
 			default: false,
 		},
 		{
+			id: "vibe-rules",
+			name: "Vibe Rules",
+			description: "Install and apply BTS rules to editors",
+			icon: "",
+			color: "from-violet-500 to-violet-700",
+			default: false,
+		},
+		{
 			id: "turborepo",
 			name: "Turborepo",
 			description: "High-performance build system",
