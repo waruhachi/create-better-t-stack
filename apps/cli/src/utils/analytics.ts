@@ -5,7 +5,10 @@ import { isTelemetryEnabled } from "./telemetry";
 const POSTHOG_API_KEY = process.env.POSTHOG_API_KEY || "";
 const POSTHOG_HOST = process.env.POSTHOG_HOST;
 
-export async function trackProjectCreation(config: ProjectConfig, disableAnalytics = false) {
+export async function trackProjectCreation(
+	config: ProjectConfig,
+	disableAnalytics = false,
+) {
 	if (!isTelemetryEnabled() || disableAnalytics) return;
 
 	const sessionId = `cli_${crypto.randomUUID().replace(/-/g, "")}`;

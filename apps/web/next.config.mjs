@@ -15,6 +15,14 @@ const config = {
 	outputFileTracingExcludes: {
 		"*": ["./**/*.js.map", "./**/*.mjs.map", "./**/*.cjs.map"],
 	},
+	async rewrites() {
+		return [
+			{
+				source: "/docs/:path*.mdx",
+				destination: "/llms.mdx/:path*",
+			},
+		];
+	},
 };
 
 export default withMDX(config);
