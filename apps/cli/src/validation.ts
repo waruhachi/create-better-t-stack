@@ -1,13 +1,10 @@
 import path from "node:path";
 import {
-	type Addons,
 	type API,
 	type Backend,
 	type CLIInput,
 	type Database,
 	type DatabaseSetup,
-	type Examples,
-	type Frontend,
 	type ORM,
 	type PackageManager,
 	type ProjectConfig,
@@ -27,6 +24,36 @@ import {
 	validateWorkersCompatibility,
 } from "./utils/compatibility-rules";
 import { exitWithError } from "./utils/errors";
+
+function processArrayOption<T>(options: (T | "none")[] | undefined): T[] {
+	if (!options || options.length === 0) return [];
+	if (options.includes("none" as T | "none")) return [];
+	return options.filter((item): item is T => item !== "none");
+}
+
+function deriveProjectName(
+	projectName?: string,
+	projectDirectory?: string,
+): string {
+	if (projectName) {
+		return projectName;
+	}
+	if (projectDirectory) {
+		return path.basename(path.resolve(process.cwd(), projectDirectory));
+	}
+	return "";
+}
+
+function validateProjectName(name: string): void {
+	const result = ProjectNameSchema.safeParse(name);
+	if (!result.success) {
+		exitWithError(
+			`Invalid project name: ${
+				result.error.issues[0]?.message || "Invalid project name"
+			}`,
+		);
+	}
+}
 
 export function processAndValidateFlags(
 	options: CLIInput,
@@ -96,29 +123,13 @@ export function processAndValidateFlags(
 		config.webDeploy = options.webDeploy as WebDeploy;
 	}
 
-	if (projectName) {
-		const result = ProjectNameSchema.safeParse(path.basename(projectName));
-		if (!result.success) {
-			exitWithError(
-				`Invalid project name: ${
-					result.error.issues[0]?.message || "Invalid project name"
-				}`,
-			);
-		}
-		config.projectName = projectName;
-	} else if (options.projectDirectory) {
-		const baseName = path.basename(
-			path.resolve(process.cwd(), options.projectDirectory),
-		);
-		const result = ProjectNameSchema.safeParse(baseName);
-		if (!result.success) {
-			exitWithError(
-				`Invalid project name: ${
-					result.error.issues[0]?.message || "Invalid project name"
-				}`,
-			);
-		}
-		config.projectName = baseName;
+	const derivedName = deriveProjectName(projectName, options.projectDirectory);
+	if (derivedName) {
+		const nameToValidate = projectName
+			? path.basename(projectName)
+			: derivedName;
+		validateProjectName(nameToValidate);
+		config.projectName = projectName || derivedName;
 	}
 
 	if (options.frontend && options.frontend.length > 0) {
@@ -128,9 +139,7 @@ export function processAndValidateFlags(
 			}
 			config.frontend = [];
 		} else {
-			const validOptions = options.frontend.filter(
-				(f): f is Frontend => f !== "none",
-			);
+			const validOptions = processArrayOption(options.frontend);
 			ensureSingleWebAndNative(validOptions);
 			config.frontend = validOptions;
 		}
@@ -152,9 +161,7 @@ export function processAndValidateFlags(
 			}
 			config.addons = [];
 		} else {
-			config.addons = options.addons.filter(
-				(addon): addon is Addons => addon !== "none",
-			);
+			config.addons = processArrayOption(options.addons);
 		}
 	}
 	if (options.examples && options.examples.length > 0) {
@@ -164,9 +171,7 @@ export function processAndValidateFlags(
 			}
 			config.examples = [];
 		} else {
-			config.examples = options.examples.filter(
-				(ex): ex is Examples => ex !== "none",
-			);
+			config.examples = processArrayOption(options.examples);
 			if (options.examples.includes("none") && config.backend !== "convex") {
 				config.examples = [];
 			}
@@ -419,6 +424,85 @@ export function validateConfigCompatibility(config: Partial<ProjectConfig>) {
 		effectiveDatabase,
 		effectiveFrontend ?? [],
 	);
+}
+
+export function processProvidedFlagsWithoutValidation(
+	options: CLIInput,
+	projectName?: string,
+): Partial<ProjectConfig> {
+	const config: Partial<ProjectConfig> = {};
+
+	if (options.api) {
+		config.api = options.api as API;
+	}
+
+	if (options.backend) {
+		config.backend = options.backend as Backend;
+	}
+
+	if (options.database) {
+		config.database = options.database as Database;
+	}
+
+	if (options.orm) {
+		config.orm = options.orm as ORM;
+	}
+
+	if (options.auth !== undefined) {
+		config.auth = options.auth;
+	}
+
+	if (options.git !== undefined) {
+		config.git = options.git;
+	}
+
+	if (options.install !== undefined) {
+		config.install = options.install;
+	}
+
+	if (options.runtime) {
+		config.runtime = options.runtime as Runtime;
+	}
+
+	if (options.dbSetup) {
+		config.dbSetup = options.dbSetup as DatabaseSetup;
+	}
+
+	if (options.packageManager) {
+		config.packageManager = options.packageManager as PackageManager;
+	}
+
+	if (options.webDeploy) {
+		config.webDeploy = options.webDeploy as WebDeploy;
+	}
+
+	const derivedName = deriveProjectName(projectName, options.projectDirectory);
+	if (derivedName) {
+		const nameToValidate = projectName
+			? path.basename(projectName)
+			: derivedName;
+		const result = ProjectNameSchema.safeParse(nameToValidate);
+		if (!result.success) {
+			throw new Error(
+				`Invalid project name: ${result.error.issues[0]?.message}`,
+			);
+		}
+		config.projectName = projectName || derivedName;
+	}
+
+	if (options.frontend && options.frontend.length > 0) {
+		config.frontend = processArrayOption(options.frontend);
+	}
+
+	if (options.addons && options.addons.length > 0) {
+		config.addons = processArrayOption(options.addons);
+	}
+
+	if (options.examples && options.examples.length > 0) {
+		config.examples = processArrayOption(options.examples);
+	}
+
+	return config;
 }
 
 export function getProvidedFlags(options: CLIInput): Set<string> {

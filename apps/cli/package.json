@@ -6,7 +6,7 @@
   "license": "MIT",
   "author": "Aman Varshney",
   "bin": {
-    "create-better-t-stack": "dist/index.js"
+    "create-better-t-stack": "dist/cli.js"
   },
   "files": [
     "templates",
@@ -53,6 +53,12 @@
     "test:with-build": "bun run build && WITH_BUILD=1 vitest run",
     "prepublishOnly": "npm run build"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
     "consola": "^3.4.2",
@@ -65,12 +71,12 @@
     "picocolors": "^1.1.1",
     "trpc-cli": "^0.10.2",
     "ts-morph": "^26.0.0",
-    "zod": "^4.0.15"
+    "zod": "^4.0.17"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^24.2.0",
-    "tsdown": "^0.13.3",
+    "@types/node": "^24.2.1",
+    "tsdown": "^0.14.1",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   }
