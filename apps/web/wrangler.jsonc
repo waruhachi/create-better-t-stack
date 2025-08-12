@@ -4,6 +4,7 @@
 	"name": "better-t-stack",
 	"compatibility_date": "2025-07-13",
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"minify": true,
 	"keep_names": false,
 	"assets": {
 		"directory": ".open-next/assets",
