@@ -653,20 +653,6 @@ export async function setupExamplesTemplate(
 					);
 				}
 			}
-
-			const ignorePatterns = [`${context.orm}/**`];
-			if (example === "ai" && context.backend === "next") {
-				ignorePatterns.push("next/**");
-			}
-
-			await processAndCopyFiles(
-				["**/*.ts", "**/*.hbs"],
-				exampleServerSrc,
-				serverAppDir,
-				context,
-				false,
-				ignorePatterns,
-			);
 		}
 
 		if (webAppDirExists) {
