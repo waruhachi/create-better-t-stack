@@ -3,7 +3,6 @@ import { source } from "@/lib/source";
 
 // cached forever
 export const revalidate = false;
-export const dynamic = 'force-static';
 
 export async function GET() {
 	const scan = source.getPages().map(getLLMText);
