@@ -43,11 +43,11 @@ export function SpecialSponsorBanner() {
 	if (loading) {
 		return (
 			<div>
-				<div className="flex items-center gap-2 py-1">
+				<div className="grid grid-cols-4 items-center gap-2 py-1">
 					{["s1", "s2", "s3", "s4"].map((key) => (
 						<div
 							key={key}
-							className="h-9 w-9 animate-pulse rounded border border-border bg-muted"
+							className="size-12 animate-pulse rounded border border-border bg-muted"
 						/>
 					))}
 				</div>
@@ -61,7 +61,7 @@ export function SpecialSponsorBanner() {
 
 	return (
 		<div>
-			<div className="no-scrollbar flex items-center gap-2 overflow-x-auto whitespace-nowrap py-1">
+			<div className="no-scrollbar grid grid-cols-4 items-center gap-2 overflow-x-auto whitespace-nowrap py-1">
 				{specialSponsors.map((entry) => {
 					const displayName = entry.sponsor.name || entry.sponsor.login;
 					const imgSrc = entry.sponsor.customLogoUrl || entry.sponsor.avatarUrl;
@@ -87,9 +87,9 @@ export function SpecialSponsorBanner() {
 									<Image
 										src={imgSrc}
 										alt={displayName}
-										width={36}
-										height={36}
-										className="rounded border border-border"
+										width={66}
+										height={66}
+										className="size-12 rounded border border-border"
 										unoptimized
 									/>
 								</a>
