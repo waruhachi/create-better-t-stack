@@ -20,7 +20,7 @@ export async function setupVibeRules(config: ProjectConfig) {
 			PKG_ROOT,
 			"templates",
 			"addons",
-			"vibe-rules",
+			"ruler",
 			".ruler",
 		);
 
