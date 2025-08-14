@@ -7,10 +7,10 @@ import type { Frontend, PackageManager, ProjectConfig } from "../../types";
 import { addPackageDependency } from "../../utils/add-package-deps";
 import { getPackageExecutionCommand } from "../../utils/package-runner";
 import { setupFumadocs } from "./fumadocs-setup";
+import { setupVibeRules } from "./ruler-setup";
 import { setupStarlight } from "./starlight-setup";
 import { setupTauri } from "./tauri-setup";
 import { setupUltracite } from "./ultracite-setup";
-import { setupVibeRules } from "./ruler-setup";
 import { addPwaToViteConfig } from "./vite-pwa-setup";
 
 export async function setupAddons(config: ProjectConfig, isAddCommand = false) {
