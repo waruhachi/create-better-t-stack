@@ -121,11 +121,6 @@ export async function setupUltracite(config: ProjectConfig, hasHusky: boolean) {
 			});
 		}
 
-		await addPackageDependency({
-			devDependencies: ["ultracite"],
-			projectDir,
-		});
-
 		log.success("Ultracite setup successfully!");
 	} catch (error) {
 		log.error(pc.red("Failed to set up Ultracite"));

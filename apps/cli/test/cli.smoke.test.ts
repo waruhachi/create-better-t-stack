@@ -2586,6 +2586,21 @@ describe("create-better-t-stack smoke", () => {
 							expect(codegenRes.exitCode).toBe(0);
 						}
 
+						if (scripts.build) {
+							consola.start(`Building ${dirName}...`);
+							const isTurbo = existsSync(join(projectDir, "turbo.json"));
+							const extraArgs = isTurbo ? ["--force"] : [];
+							const buildRes = await runScript(
+								pm,
+								projectDir,
+								"build",
+								extraArgs,
+								300_000,
+							);
+							expect(buildRes.exitCode).toBe(0);
+							consola.success(`${dirName} built successfully`);
+						}
+
 						if (scripts["check-types"]) {
 							consola.start(`Type checking ${dirName}...`);
 							try {
@@ -2609,21 +2624,6 @@ describe("create-better-t-stack smoke", () => {
 									error.message,
 								);
 							}
-						}
-
-						if (scripts.build) {
-							consola.start(`Building ${dirName}...`);
-							const isTurbo = existsSync(join(projectDir, "turbo.json"));
-							const extraArgs = isTurbo ? ["--force"] : [];
-							const buildRes = await runScript(
-								pm,
-								projectDir,
-								"build",
-								extraArgs,
-								300_000,
-							);
-							expect(buildRes.exitCode).toBe(0);
-							consola.success(`${dirName} built successfully`);
 						}
 
 						if (!scripts.build && !scripts["check-types"]) {
