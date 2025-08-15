@@ -1,0 +1,17 @@
+{
+  "version": "independent",
+  "npmClient": "bun",
+  "command": {
+    "publish": {
+      "verifyAccess": false,
+      "message": "chore(release): publish"
+    },
+    "version": {
+      "message": "chore(release): version"
+    }
+  },
+  "packages": [
+    "apps/*",
+    "packages/*"
+  ]
+}
