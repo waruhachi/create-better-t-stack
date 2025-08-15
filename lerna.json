@@ -1,5 +1,5 @@
 {
-  "version": "2.33.5",
+  "version": "2.33.6",
   "npmClient": "bun",
   "command": {
     "publish": {

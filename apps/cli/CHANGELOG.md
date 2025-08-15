@@ -1,19 +1,18 @@
-# v2.33.6 (Fri Aug 15 2025)
-
-#### 🐛 Bug Fix
-
-- fix: remove forced none webdeploy when convex ([@AmanVarshney01](https://github.com/AmanVarshney01))
-
-#### Authors: 1
-
-- Aman Varshney ([@AmanVarshney01](https://github.com/AmanVarshney01))
-
----
-
 # Change Log
 
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [2.33.6](https://github.com/AmanVarshney01/create-better-t-stack/compare/v2.33.5...v2.33.6) (2025-08-15)
+
+
+### Bug Fixes
+
+* remove forced none webdeploy when convex ([ac1067a](https://github.com/AmanVarshney01/create-better-t-stack/commit/ac1067ab231fa452bd85bf8ce51bb2edc7746199))
+
+
+
+
 
 ## 2.33.5 (2025-08-15)
 
