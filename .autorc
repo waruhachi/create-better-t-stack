@@ -8,12 +8,7 @@
       }
     ],
     "all-contributors",
-    [
-      "conventional-commits",
-      {
-        "defaultReleaseType": "patch"
-      }
-    ],
+    "conventional-commits",
     "first-time-contributor",
     "released"
   ],
@@ -22,23 +17,12 @@
   "name": "Aman Varshney",
   "email": "amanvarshney.work@gmail.com",
   "baseBranch": "main",
-  "onlyPublishWithReleaseLabel": false,
   "labels": [
     {
       "name": "skip-release",
       "changelogTitle": "⚠️ Pushed to `main`",
       "description": "Skip a release and only update the changelog",
       "releaseType": "skip"
-    },
-    {
-      "name": "internal",
-      "changelogTitle": "🏠 Internal",
-      "releaseType": "patch"
-    },
-    {
-      "name": "documentation",
-      "changelogTitle": "📝 Documentation",
-      "releaseType": "patch"
     }
   ]
 }

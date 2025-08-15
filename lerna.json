@@ -5,13 +5,11 @@
     "publish": {
       "conventionalCommits": true,
       "message": "chore(release): publish",
-      "verifyAccess": false,
-      "allowBranch": ["main"]
+      "verifyAccess": false
     },
     "version": {
       "conventionalCommits": true,
-      "message": "chore(release): version",
-      "allowBranch": ["main"]
+      "message": "chore(release): version"
     }
   },
   "packages": [
