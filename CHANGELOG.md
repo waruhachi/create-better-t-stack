@@ -1,3 +1,21 @@
+# v2.33.6 (Fri Aug 15 2025)
+
+#### 🐛 Bug Fix
+
+- fix: auto configuration ([@AmanVarshney01](https://github.com/AmanVarshney01))
+- `create-better-t-stack`
+  - fix: remove forced none webdeploy when convex ([@AmanVarshney01](https://github.com/AmanVarshney01))
+
+#### ⚠️ Pushed to `main`
+
+- Revert "fix: auto configuration" ([@AmanVarshney01](https://github.com/AmanVarshney01))
+
+#### Authors: 1
+
+- Aman Varshney ([@AmanVarshney01](https://github.com/AmanVarshney01))
+
+---
+
 # Change Log
 
 All notable changes to this project will be documented in this file.
