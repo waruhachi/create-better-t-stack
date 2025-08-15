@@ -6,7 +6,8 @@
         "forcePublish": false,
         "subPackageChangelogs": true,
         "exact": true,
-        "monorepoChangelog": true
+        "monorepoChangelog": true,
+        "setRcToken": false
       }
     ],
     "all-contributors",

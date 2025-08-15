@@ -20,7 +20,9 @@
     "release": "auto shipit",
     "version": "auto version",
     "changelog": "auto changelog",
-    "publish": "auto shipit --dry-run"
+    "publish": "auto shipit --dry-run",
+    "lerna:version": "lerna version --no-push",
+    "lerna:publish": "lerna publish from-package"
   },
   "devDependencies": {
     "@auto-it/all-contributors": "^11.3.0",
@@ -31,6 +33,7 @@
     "auto": "^11.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
+    "lerna": "^8.2.3",
     "turbo": "^2.5.5",
     "typescript": "5.8.3"
   },
