@@ -23,6 +23,11 @@
   "next": {
     "message": "🎉 This PR is included in version %NEXT_PATCH_VERSION% of this package. The release is available on [npm](https://www.npmjs.com/package/create-better-t-stack)!"
   },
+  "canary": {
+    "target": "pr-body",
+    "message": "🚀 Canary version published: `npm install -g create-better-t-stack@%v`",
+    "force": false
+  },
   "labels": [
     {
       "name": "skip-release",
