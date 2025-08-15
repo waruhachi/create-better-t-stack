@@ -1,12 +1,11 @@
-name: Release
+name: Canary Release
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
-  release:
+  canary:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
     steps:
@@ -14,12 +13,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare repository
-        run: |
-          git fetch --unshallow --tags
-          git checkout main
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -32,11 +27,9 @@ jobs:
       - name: Build CLI
         run: bun run build:cli
 
-      - name: Create Release
+      - name: Create Canary Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           BTS_TELEMETRY: 1
-          POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
-          POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
-        run: bun auto shipit
+        run: bun auto canary
