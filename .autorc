@@ -1,0 +1,28 @@
+{
+  "plugins": [
+    [
+      "npm",
+      {
+        "forcePublish": false,
+        "subPackageChangelogs": true
+      }
+    ],
+    "all-contributors",
+    "conventional-commits",
+    "first-time-contributor",
+    "released"
+  ],
+  "author": "Aman Varshney <amanvarshney.work@gmail.com>",
+  "repo": "AmanVarshney01/create-better-t-stack",
+  "name": "Aman Varshney",
+  "email": "amanvarshney.work@gmail.com",
+  "baseBranch": "main",
+  "labels": [
+    {
+      "name": "skip-release",
+      "changelogTitle": "⚠️ Pushed to `main`",
+      "description": "Skip a release and only update the changelog",
+      "releaseType": "skip"
+    }
+  ]
+}

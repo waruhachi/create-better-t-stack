@@ -43,6 +43,9 @@
     "url": "git+https://github.com/AmanVarshney01/create-better-t-stack.git",
     "directory": "apps/cli"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "https://better-t-stack.dev/",
   "scripts": {
     "build": "tsdown",
@@ -50,8 +53,7 @@
     "check-types": "tsc --noEmit",
     "check": "biome check --write .",
     "test": "bun run build && vitest --ui",
-    "test:with-build": "bun run build && WITH_BUILD=1 vitest --ui",
-    "prepublishOnly": "npm run build"
+    "test:with-build": "bun run build && WITH_BUILD=1 vitest --ui"
   },
   "exports": {
     ".": {

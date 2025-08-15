@@ -1,42 +1,54 @@
 {
-	"name": "better-t-stack",
-	"private": true,
-	"scripts": {
-		"build": "turbo build",
-		"dev": "turbo dev",
-		"dev:cli": "turbo run dev --filter=create-better-t-stack",
-		"cli": "cd apps/cli && node dist/cli.js",
-		"dev:web": "turbo run dev --filter=web",
-		"build:web": "turbo run build --filter=web",
-		"build:cli": "turbo run build --filter=create-better-t-stack",
-		"lint": "turbo lint",
-		"check": "turbo check",
-		"format": "biome check --write .",
-		"publish-packages": "turbo run build --filter=create-better-t-stack && changeset publish",
-		"deploy:convex": "turbo run --filter=@better-t-stack/backend deploy",
-		"deploy:web": "bun run --filter=web deploy",
-		"generate": "bun run --filter=web generate-analytics && bun run --filter=web generate-schema",
-		"deploy": "bun run deploy:web"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.1.2",
-		"@changesets/cli": "^2.29.5",
-		"husky": "^9.1.7",
-		"lint-staged": "^16.1.2",
-		"turbo": "^2.5.5",
-		"typescript": "5.8.3"
-	},
-	"lint-staged": {
-		"*": [
-			"bun biome check --write ."
-		]
-	},
-	"engines": {
-		"node": ">=20"
-	},
-	"packageManager": "bun@1.2.19",
-	"workspaces": [
-		"apps/*",
-		"packages/*"
-	]
+  "name": "better-t-stack",
+  "version": "2.33.4",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "dev:cli": "turbo run dev --filter=create-better-t-stack",
+    "cli": "cd apps/cli && node dist/cli.js",
+    "dev:web": "turbo run dev --filter=web",
+    "build:web": "turbo run build --filter=web",
+    "build:cli": "turbo run build --filter=create-better-t-stack",
+    "lint": "turbo lint",
+    "check": "turbo check",
+    "format": "biome check --write .",
+    "deploy:convex": "turbo run --filter=@better-t-stack/backend deploy",
+    "deploy:web": "bun run --filter=web deploy",
+    "generate": "bun run --filter=web generate-analytics && bun run --filter=web generate-schema",
+    "deploy": "bun run deploy:web",
+    "release": "auto shipit",
+    "version": "auto version",
+    "changelog": "auto changelog",
+    "publish": "auto shipit --dry-run"
+  },
+  "devDependencies": {
+    "@auto-it/all-contributors": "^11.3.0",
+    "@auto-it/conventional-commits": "^11.3.0",
+    "@auto-it/first-time-contributor": "^11.3.0",
+    "@auto-it/released": "^11.3.0",
+    "@biomejs/biome": "2.1.2",
+    "auto": "^11.3.0",
+    "husky": "^9.1.7",
+    "lerna": "^8.2.3",
+    "lint-staged": "^16.1.2",
+    "turbo": "^2.5.5",
+    "typescript": "5.8.3"
+  },
+  "lint-staged": {
+    "*": [
+      "bun biome check --write ."
+    ]
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "bun@1.2.20",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "repository": "AmanVarshney01/create-better-t-stack",
+  "author": "Aman Varshney <amanvarshney.work@gmail.com>",
+  "dependencies": {}
 }
