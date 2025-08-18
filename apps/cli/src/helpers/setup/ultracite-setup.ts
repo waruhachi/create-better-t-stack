@@ -97,7 +97,7 @@ export async function setupUltracite(config: ProjectConfig, hasHusky: boolean) {
 		}
 
 		if (hasHusky) {
-			ultraciteArgs.push("--features", "husky", "lint-staged");
+			ultraciteArgs.push("--integrations", "husky", "lint-staged");
 		}
 
 		const ultraciteArgsString = ultraciteArgs.join(" ");
