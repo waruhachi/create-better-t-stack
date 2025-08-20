@@ -7,25 +7,37 @@ const __filename = fileURLToPath(import.meta.url);
 const distPath = path.dirname(__filename);
 export const PKG_ROOT = path.join(distPath, "../");
 
-export const DEFAULT_CONFIG: ProjectConfig = {
+export const DEFAULT_CONFIG_BASE = {
 	projectName: "my-better-t-app",
-	projectDir: path.resolve(process.cwd(), "my-better-t-app"),
 	relativePath: "my-better-t-app",
-	frontend: ["tanstack-router"],
-	database: "sqlite",
-	orm: "drizzle",
+	frontend: ["tanstack-router"] as const,
+	database: "sqlite" as const,
+	orm: "drizzle" as const,
 	auth: true,
-	addons: ["turborepo"],
-	examples: [],
+	addons: ["turborepo"] as const,
+	examples: [] as const,
 	git: true,
-	packageManager: getUserPkgManager(),
 	install: true,
-	dbSetup: "none",
-	backend: "hono",
-	runtime: "bun",
-	api: "trpc",
-	webDeploy: "none",
-};
+	dbSetup: "none" as const,
+	backend: "hono" as const,
+	runtime: "bun" as const,
+	api: "trpc" as const,
+	webDeploy: "none" as const,
+	serverDeploy: "none" as const,
+} as const;
+
+export function getDefaultConfig(): ProjectConfig {
+	return {
+		...DEFAULT_CONFIG_BASE,
+		projectDir: path.resolve(process.cwd(), DEFAULT_CONFIG_BASE.projectName),
+		packageManager: getUserPkgManager(),
+		frontend: [...DEFAULT_CONFIG_BASE.frontend],
+		addons: [...DEFAULT_CONFIG_BASE.addons],
+		examples: [...DEFAULT_CONFIG_BASE.examples],
+	};
+}
+
+export const DEFAULT_CONFIG = getDefaultConfig();
 
 export const dependencyVersionMap = {
 	"better-auth": "^1.3.4",
@@ -106,7 +118,8 @@ export const dependencyVersionMap = {
 	"convex-nuxt": "0.1.5",
 	"convex-vue": "^0.1.5",
 
-	"@tanstack/svelte-query": "^5.74.4",
+	"@tanstack/svelte-query": "^5.85.3",
+	"@tanstack/svelte-query-devtools": "^5.85.3",
 
 	"@tanstack/vue-query-devtools": "^5.83.0",
 	"@tanstack/vue-query": "^5.83.0",
@@ -116,19 +129,27 @@ export const dependencyVersionMap = {
 
 	"@tanstack/solid-query": "^5.75.0",
 	"@tanstack/solid-query-devtools": "^5.75.0",
+	"@tanstack/solid-router-devtools": "^1.131.25",
 
 	wrangler: "^4.23.0",
 	"@cloudflare/vite-plugin": "^1.9.0",
 	"@opennextjs/cloudflare": "^1.3.0",
 	"nitro-cloudflare-dev": "^0.2.2",
-	"@sveltejs/adapter-cloudflare": "^7.0.4",
+	"@sveltejs/adapter-cloudflare": "^7.2.1",
+	"@cloudflare/workers-types": "^4.20250813.0",
+
+	alchemy: "^0.62.1",
+	// temporary workaround for alchemy + tanstack start
+	nitropack: "^2.12.4",
+
+	dotenv: "^17.2.1",
 } as const;
 
 export type AvailableDependencies = keyof typeof dependencyVersionMap;
 
 export const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
 	pwa: ["tanstack-router", "react-router", "solid", "next"],
-	tauri: ["tanstack-router", "react-router", "nuxt", "svelte", "solid"],
+	tauri: ["tanstack-router", "react-router", "nuxt", "svelte", "solid", "next"],
 	biome: [],
 	husky: [],
 	turborepo: [],

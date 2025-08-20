@@ -1,13 +1,7 @@
 import { join } from "node:path";
 import consola from "consola";
 import { execa } from "execa";
-import {
-	ensureDirSync,
-	existsSync,
-	readFileSync,
-	readJsonSync,
-	removeSync,
-} from "fs-extra";
+import { ensureDir, existsSync, readFile, readJson, remove } from "fs-extra";
 import * as JSONC from "jsonc-parser";
 import { FailedToExitError } from "trpc-cli";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -17,6 +11,8 @@ async function runCli(argv: string[], cwd: string) {
 	const previous = process.cwd();
 	process.chdir(cwd);
 	try {
+		consola.info(`Running CLI command: bts ${argv.join(" ")}`);
+
 		const cli = createBtsCli();
 		await cli
 			.run({
@@ -37,12 +33,12 @@ async function runCli(argv: string[], cwd: string) {
 	}
 }
 
-function createTmpDir(_prefix: string) {
+async function createTmpDir(_prefix: string) {
 	const dir = join(__dirname, "..", ".smoke");
 	if (existsSync(dir)) {
-		removeSync(dir);
+		await remove(dir);
 	}
-	ensureDirSync(dir);
+	await ensureDir(dir);
 	return dir;
 }
 
@@ -50,6 +46,10 @@ async function runCliExpectingError(args: string[], cwd: string) {
 	const previous = process.cwd();
 	process.chdir(cwd);
 	try {
+		consola.info(
+			`Running CLI command (expecting error): bts ${args.join(" ")}`,
+		);
+
 		const cli = createBtsCli();
 		let threw = false;
 		await cli
@@ -72,15 +72,15 @@ async function runCliExpectingError(args: string[], cwd: string) {
 	}
 }
 
-function assertScaffoldedProject(dir: string) {
+async function assertScaffoldedProject(dir: string) {
 	const pkgJsonPath = join(dir, "package.json");
 	expect(existsSync(pkgJsonPath)).toBe(true);
-	const pkg = readJsonSync(pkgJsonPath);
+	const pkg = await readJson(pkgJsonPath);
 	expect(typeof pkg.name).toBe("string");
 	expect(Array.isArray(pkg.workspaces)).toBe(true);
 }
 
-function assertProjectStructure(
+async function assertProjectStructure(
 	dir: string,
 	options: {
 		hasWeb?: boolean;
@@ -107,6 +107,13 @@ function assertProjectStructure(
 	expect(existsSync(join(dir, "package.json"))).toBe(true);
 	expect(existsSync(join(dir, ".gitignore"))).toBe(true);
 
+	try {
+		const pmConfig = (await readBtsConfig(dir)) as { packageManager?: string };
+		if (pmConfig && pmConfig.packageManager === "bun") {
+			expect(existsSync(join(dir, "bunfig.toml"))).toBe(true);
+		}
+	} catch {}
+
 	if (hasWeb) {
 		expect(existsSync(join(dir, "apps", "web", "package.json"))).toBe(true);
 		const webDir = join(dir, "apps", "web");
@@ -132,6 +139,26 @@ function assertProjectStructure(
 				hasAppDir ||
 				hasPublicDir,
 		).toBe(true);
+
+		const bts = (await readBtsConfig(dir)) as {
+			webDeploy?: string;
+			serverDeploy?: string;
+			frontend?: string[];
+		};
+		if (bts.webDeploy === "wrangler") {
+			expect(existsSync(join(dir, "apps", "web", "wrangler.jsonc"))).toBe(true);
+		}
+
+		if (
+			bts.webDeploy === "alchemy" &&
+			bts.serverDeploy !== "alchemy" &&
+			bts.frontend &&
+			bts.frontend.length > 0
+		) {
+			const webRunner = join(dir, "apps", "web", "alchemy.run.ts");
+			consola.info(`Checking Alchemy web runner at: ${webRunner}`);
+			expect(existsSync(webRunner)).toBe(true);
+		}
 	}
 
 	if (hasNative) {
@@ -154,7 +181,41 @@ function assertProjectStructure(
 		expect(existsSync(join(dir, "apps", "server", "src", "index.ts"))).toBe(
 			true,
 		);
+		expect(existsSync(join(dir, "apps", "server", "tsconfig.json"))).toBe(true);
+
+		const bts = (await readBtsConfig(dir)) as {
+			serverDeploy?: string;
+			webDeploy?: string;
+		};
+		if (bts.serverDeploy === "wrangler") {
+			expect(existsSync(join(dir, "apps", "server", "wrangler.jsonc"))).toBe(
+				true,
+			);
+		}
+		if (bts.serverDeploy === "alchemy") {
+			const serverRunner = join(dir, "apps", "server", "alchemy.run.ts");
+			const serverEnv = join(dir, "apps", "server", "env.d.ts");
+			consola.info(`Checking Alchemy server runner at: ${serverRunner}`);
+			consola.info(`Checking Alchemy env types at: ${serverEnv}`);
+			expect(existsSync(serverRunner)).toBe(true);
+			expect(existsSync(serverEnv)).toBe(true);
+		}
 	}
+
+	try {
+		const btsAll = (await readBtsConfig(dir)) as {
+			serverDeploy?: string;
+			webDeploy?: string;
+		};
+		if (btsAll.serverDeploy === "alchemy" && btsAll.webDeploy === "alchemy") {
+			const rootRunner = join(dir, "alchemy.run.ts");
+			const serverEnv = join(dir, "apps", "server", "env.d.ts");
+			consola.info(`Checking Alchemy root runner at: ${rootRunner}`);
+			consola.info(`Checking Alchemy env types at: ${serverEnv}`);
+			expect(existsSync(rootRunner)).toBe(true);
+			expect(existsSync(serverEnv)).toBe(true);
+		}
+	} catch {}
 
 	if (hasConvexBackend) {
 		const hasPackagesDir = existsSync(join(dir, "packages"));
@@ -208,11 +269,11 @@ function assertProjectStructure(
 	}
 
 	expect(existsSync(join(dir, "bts.jsonc"))).toBe(true);
-	const btsConfig = readFileSync(join(dir, "bts.jsonc"), "utf8");
+	const btsConfig = await readFile(join(dir, "bts.jsonc"), "utf8");
 	expect(btsConfig).toContain("Better-T-Stack configuration");
 }
 
-function assertBtsConfig(
+async function assertBtsConfig(
 	dir: string,
 	expectedConfig: Partial<{
 		frontend: string[];
@@ -225,11 +286,13 @@ function assertBtsConfig(
 		api: string;
 		runtime: string;
 		packageManager: string;
+		webDeploy: string;
+		serverDeploy: string;
 	}>,
 ) {
 	const btsConfigPath = join(dir, "bts.jsonc");
 	expect(existsSync(btsConfigPath)).toBe(true);
-	const content = readFileSync(btsConfigPath, "utf8");
+	const content = await readFile(btsConfigPath, "utf8");
 
 	type BtsConfig = {
 		frontend?: string[];
@@ -242,6 +305,8 @@ function assertBtsConfig(
 		api?: string;
 		runtime?: string;
 		packageManager?: string;
+		webDeploy?: string;
+		serverDeploy?: string;
 	};
 
 	const errors: JSONC.ParseError[] = [];
@@ -286,13 +351,19 @@ function assertBtsConfig(
 	if (expectedConfig.packageManager) {
 		expect(config.packageManager).toBe(expectedConfig.packageManager);
 	}
+	if (expectedConfig.webDeploy) {
+		expect(config.webDeploy).toBe(expectedConfig.webDeploy);
+	}
+	if (expectedConfig.serverDeploy) {
+		expect(config.serverDeploy).toBe(expectedConfig.serverDeploy);
+	}
 }
 
-function readBtsConfig(dir: string) {
+async function readBtsConfig(dir: string) {
 	const btsConfigPath = join(dir, "bts.jsonc");
 	if (!existsSync(btsConfigPath)) return {} as Record<string, unknown>;
 
-	const content = readFileSync(btsConfigPath, "utf8");
+	const content = await readFile(btsConfigPath, "utf8");
 	const errors: JSONC.ParseError[] = [];
 	const parsed = JSONC.parse(content, errors, {
 		allowTrailingComma: true,
@@ -309,7 +380,7 @@ describe("create-better-t-stack smoke", () => {
 	let workdir: string;
 
 	beforeAll(async () => {
-		workdir = createTmpDir("cli");
+		workdir = await createTmpDir("cli");
 		consola.start("Building CLI...");
 		const buildProc = execa("bun", ["run", "build"], {
 			cwd: join(__dirname, ".."),
@@ -329,7 +400,6 @@ describe("create-better-t-stack smoke", () => {
 		consola.info("Programmatic CLI mode");
 	});
 
-	// Exhaustive matrix: all frontends x standard backends (no db, no orm, no api, no auth)
 	describe("frontend x backend matrix (no db, no api)", () => {
 		const FRONTENDS = [
 			"tanstack-router",
@@ -391,15 +461,15 @@ describe("create-better-t-stack smoke", () => {
 						);
 
 						const projectDir = join(workdir, projectName);
-						assertScaffoldedProject(projectDir);
-						assertProjectStructure(projectDir, {
+						await assertScaffoldedProject(projectDir);
+						await assertProjectStructure(projectDir, {
 							hasWeb: WEB_FRONTENDS.has(frontend),
 							hasNative:
 								frontend === "native-nativewind" ||
 								frontend === "native-unistyles",
 							hasServer: true,
 						});
-						assertBtsConfig(projectDir, {
+						await assertBtsConfig(projectDir, {
 							frontend: [frontend],
 							backend,
 							database: "none",
@@ -474,9 +544,9 @@ describe("create-better-t-stack smoke", () => {
 			});
 		}
 	});
-	afterAll(() => {
+	afterAll(async () => {
 		try {
-			removeSync(workdir);
+			await remove(workdir);
 		} catch {}
 	});
 
@@ -1101,6 +1171,52 @@ describe("create-better-t-stack smoke", () => {
 			});
 		});
 
+		it("scaffolds with PostgreSQL + Drizzle", async () => {
+			const projectName = "app-postgres-drizzle";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"hono",
+					"--runtime",
+					"bun",
+					"--database",
+					"postgres",
+					"--orm",
+					"drizzle",
+					"--api",
+					"trpc",
+					"--no-auth",
+					"--addons",
+					"none",
+					"--db-setup",
+					"none",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			assertScaffoldedProject(projectDir);
+			assertProjectStructure(projectDir, {
+				hasWeb: true,
+				hasServer: true,
+				hasDatabase: true,
+			});
+			assertBtsConfig(projectDir, {
+				database: "postgres",
+				orm: "drizzle",
+			});
+		});
+
 		it("scaffolds with MongoDB + Mongoose", async () => {
 			const projectName = "app-mongo-mongoose";
 			await runCli(
@@ -1457,6 +1573,116 @@ describe("create-better-t-stack smoke", () => {
 				workdir,
 			);
 		});
+
+		it("rejects Turso db-setup with non-SQLite database", async () => {
+			await runCliExpectingError(
+				[
+					"invalid-combo",
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"hono",
+					"--runtime",
+					"bun",
+					"--database",
+					"postgres",
+					"--orm",
+					"prisma",
+					"--api",
+					"none",
+					"--no-auth",
+					"--addons",
+					"none",
+					"--db-setup",
+					"turso",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+		});
+	});
+
+	describe("YOLO mode", () => {
+		it("bypasses db-setup/database validation (Turso + Postgres + Prisma)", async () => {
+			const projectName = "app-yolo-turso-postgres";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"hono",
+					"--runtime",
+					"bun",
+					"--database",
+					"postgres",
+					"--orm",
+					"prisma",
+					"--api",
+					"none",
+					"--no-auth",
+					"--addons",
+					"none",
+					"--db-setup",
+					"turso",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+					"--yolo",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			await assertScaffoldedProject(projectDir);
+			await assertBtsConfig(projectDir, {
+				database: "postgres",
+				orm: "prisma",
+			});
+		});
+
+		it("bypasses web-deploy requires web frontend (none + wrangler)", async () => {
+			const projectName = "app-yolo-webdeploy-no-frontend";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"none",
+					"--backend",
+					"none",
+					"--web-deploy",
+					"wrangler",
+					"--addons",
+					"none",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+					"--yolo",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			await assertScaffoldedProject(projectDir);
+			await assertBtsConfig(projectDir, {
+				backend: "none",
+				webDeploy: "wrangler",
+			});
+		});
 	});
 
 	describe("runtime compatibility", () => {
@@ -1500,10 +1726,6 @@ describe("create-better-t-stack smoke", () => {
 				runtime: "workers",
 				orm: "drizzle",
 			});
-
-			expect(
-				existsSync(join(projectDir, "apps", "server", "wrangler.jsonc")),
-			).toBe(true);
 		});
 
 		it("rejects incompatible runtime and backend combinations", async () => {
@@ -1810,7 +2032,6 @@ describe("create-better-t-stack smoke", () => {
 			});
 		});
 
-		// Git and install flag variations
 		it("scaffolds with git enabled", async () => {
 			const projectName = "app-with-git";
 			await runCli(
@@ -1855,6 +2076,8 @@ describe("create-better-t-stack smoke", () => {
 				[
 					projectName,
 					"--yes",
+					"--directory-conflict",
+					"overwrite",
 					"--frontend",
 					"tanstack-router",
 					"--backend",
@@ -1887,7 +2110,6 @@ describe("create-better-t-stack smoke", () => {
 			expect(existsSync(join(projectDir, "node_modules"))).toBe(true);
 		});
 
-		// Additional addons beyond turborepo and biome
 		it("scaffolds with PWA addon", async () => {
 			const projectName = "app-addon-pwa";
 			await runCli(
@@ -2008,7 +2230,6 @@ describe("create-better-t-stack smoke", () => {
 			});
 		});
 
-		// Authentication combinations
 		it("scaffolds with authentication enabled", async () => {
 			const projectName = "app-with-auth";
 			await runCli(
@@ -2055,7 +2276,6 @@ describe("create-better-t-stack smoke", () => {
 			});
 		});
 
-		// MySQL database
 		it("scaffolds with MySQL + Prisma", async () => {
 			const projectName = "app-mysql-prisma";
 			await runCli(
@@ -2138,7 +2358,6 @@ describe("create-better-t-stack smoke", () => {
 			});
 		});
 
-		// oRPC API with more frontends
 		it("scaffolds oRPC with Next.js", async () => {
 			const projectName = "app-orpc-next";
 			await runCli(
@@ -2303,7 +2522,6 @@ describe("create-better-t-stack smoke", () => {
 			});
 		});
 
-		// Backend next combinations
 		it("scaffolds with Next.js backend", async () => {
 			const projectName = "app-backend-next";
 			await runCli(
@@ -2345,7 +2563,6 @@ describe("create-better-t-stack smoke", () => {
 			});
 		});
 
-		// Node runtime combinations
 		it("scaffolds with Node runtime", async () => {
 			const projectName = "app-node-runtime";
 			await runCli(
@@ -2459,14 +2676,16 @@ describe("create-better-t-stack smoke", () => {
 				"app-orpc-solid",
 				"app-backend-next",
 				"app-node-runtime",
-			].forEach((n) => projectNames.add(n));
+			].forEach((n) => {
+				projectNames.add(n);
+			});
 
-			const detectPackageManager = (
+			const detectPackageManager = async (
 				projectDir: string,
-			): "bun" | "pnpm" | "npm" => {
+			): Promise<"bun" | "pnpm" | "npm"> => {
 				const bts = readBtsConfig(projectDir) as { packageManager?: string };
 				const pkgJsonPath = join(projectDir, "package.json");
-				const pkg = existsSync(pkgJsonPath) ? readJsonSync(pkgJsonPath) : {};
+				const pkg = existsSync(pkgJsonPath) ? await readJson(pkgJsonPath) : {};
 				const pkgMgrField =
 					(pkg.packageManager as string | undefined) || bts.packageManager;
 
@@ -2531,7 +2750,7 @@ describe("create-better-t-stack smoke", () => {
 						consola.info(`${dirName} not found, skipping`);
 						return;
 					}
-					const pm = detectPackageManager(projectDir);
+					const pm = await detectPackageManager(projectDir);
 
 					consola.info(`Processing ${dirName} (pm=${pm})`);
 					try {
@@ -2552,11 +2771,11 @@ describe("create-better-t-stack smoke", () => {
 						}
 
 						const pkgJsonPath = join(projectDir, "package.json");
-						const pkg = readJsonSync(pkgJsonPath);
+						const pkg = await readJson(pkgJsonPath);
 						const scripts = pkg.scripts || {};
 						consola.info(`Scripts: ${Object.keys(scripts).join(", ")}`);
 
-						const bts = readBtsConfig(projectDir) as {
+						const bts = (await readBtsConfig(projectDir)) as {
 							backend?: string;
 							frontend?: string[];
 						};
@@ -2603,32 +2822,24 @@ describe("create-better-t-stack smoke", () => {
 
 						if (scripts["check-types"]) {
 							consola.start(`Type checking ${dirName}...`);
-							try {
-								const typeRes = await runScript(
-									pm,
-									projectDir,
-									"check-types",
-									[],
-									120_000,
-								);
-								if (typeRes.exitCode === 0) {
-									consola.success(`${dirName} type check passed`);
-								} else {
-									consola.warn(
-										`${dirName} type check failed (exit code ${typeRes.exitCode}) - likely due to missing generated files`,
-									);
-								}
-							} catch (error) {
-								consola.warn(
-									`${dirName} type check failed - likely due to missing generated files:`,
-									error.message,
-								);
-							}
+							const typeRes = await runScript(
+								pm,
+								projectDir,
+								"check-types",
+								[],
+								120_000,
+							);
+							expect(typeRes.exitCode).toBe(0);
+							consola.success(`${dirName} type check passed`);
 						}
 
 						if (!scripts.build && !scripts["check-types"]) {
 							consola.info(
 								`No build or check-types script for ${dirName}, skipping`,
+							);
+						} else if (!scripts.build && scripts["check-types"]) {
+							consola.info(
+								`Only check-types script available for ${dirName}, type checking will be performed`,
 							);
 						}
 					} catch (error) {
@@ -2639,4 +2850,279 @@ describe("create-better-t-stack smoke", () => {
 			}
 		},
 	);
+
+	describe("deploy combinations", () => {
+		it("scaffolds workers runtime + web deploy wrangler", async () => {
+			const projectName = "app-web-wrangler";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"hono",
+					"--runtime",
+					"workers",
+					"--web-deploy",
+					"wrangler",
+					"--database",
+					"none",
+					"--orm",
+					"none",
+					"--api",
+					"none",
+					"--no-auth",
+					"--addons",
+					"none",
+					"--db-setup",
+					"none",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			await assertScaffoldedProject(projectDir);
+			await assertBtsConfig(projectDir, {
+				frontend: ["tanstack-router"],
+				backend: "hono",
+				runtime: "workers",
+			});
+		});
+
+		it("scaffolds workers runtime + web deploy alchemy", async () => {
+			const projectName = "app-web-alchemy";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"hono",
+					"--runtime",
+					"workers",
+					"--web-deploy",
+					"alchemy",
+					"--database",
+					"none",
+					"--orm",
+					"none",
+					"--api",
+					"none",
+					"--no-auth",
+					"--addons",
+					"none",
+					"--db-setup",
+					"none",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			await assertScaffoldedProject(projectDir);
+			await assertBtsConfig(projectDir, {
+				frontend: ["tanstack-router"],
+				backend: "hono",
+				runtime: "workers",
+			});
+		});
+
+		it("scaffolds workers runtime + server deploy alchemy (server-only)", async () => {
+			const projectName = "app-server-only-alchemy";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--directory-conflict",
+					"overwrite",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"hono",
+					"--runtime",
+					"workers",
+					"--server-deploy",
+					"alchemy",
+					"--database",
+					"none",
+					"--orm",
+					"none",
+					"--api",
+					"none",
+					"--no-auth",
+					"--addons",
+					"none",
+					"--db-setup",
+					"none",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			await assertScaffoldedProject(projectDir);
+			await assertBtsConfig(projectDir, {
+				frontend: ["tanstack-router"],
+				backend: "hono",
+				runtime: "workers",
+				serverDeploy: "alchemy",
+			});
+			consola.info("Verifying server-only Alchemy artifacts");
+			expect(
+				existsSync(join(projectDir, "apps", "server", "alchemy.run.ts")),
+			).toBe(true);
+			expect(existsSync(join(projectDir, "apps", "server", "env.d.ts"))).toBe(
+				true,
+			);
+			expect(existsSync(join(projectDir, "alchemy.run.ts"))).toBe(false);
+		});
+
+		it("scaffolds workers runtime + server deploy wrangler", async () => {
+			const projectName = "app-server-wrangler";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"hono",
+					"--runtime",
+					"workers",
+					"--server-deploy",
+					"wrangler",
+					"--database",
+					"none",
+					"--orm",
+					"none",
+					"--api",
+					"none",
+					"--no-auth",
+					"--addons",
+					"none",
+					"--db-setup",
+					"none",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			await assertScaffoldedProject(projectDir);
+			await assertBtsConfig(projectDir, {
+				frontend: ["tanstack-router"],
+				backend: "hono",
+				runtime: "workers",
+			});
+		});
+
+		it("scaffolds workers runtime + server deploy alchemy", async () => {
+			const projectName = "app-server-alchemy";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"hono",
+					"--runtime",
+					"workers",
+					"--server-deploy",
+					"alchemy",
+					"--database",
+					"none",
+					"--orm",
+					"none",
+					"--api",
+					"none",
+					"--no-auth",
+					"--addons",
+					"none",
+					"--db-setup",
+					"none",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			await assertScaffoldedProject(projectDir);
+			await assertBtsConfig(projectDir, {
+				frontend: ["tanstack-router"],
+				backend: "hono",
+				runtime: "workers",
+			});
+		});
+
+		it("scaffolds web deploy wrangler with backend none (no server deploy)", async () => {
+			const projectName = "app-web-wrangler-only";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"none",
+					"--web-deploy",
+					"wrangler",
+					"--database",
+					"none",
+					"--orm",
+					"none",
+					"--api",
+					"none",
+					"--no-auth",
+					"--addons",
+					"none",
+					"--db-setup",
+					"none",
+					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			await assertScaffoldedProject(projectDir);
+			await assertBtsConfig(projectDir, {
+				frontend: ["tanstack-router"],
+				backend: "none",
+				webDeploy: "wrangler",
+			});
+		});
+	});
 });

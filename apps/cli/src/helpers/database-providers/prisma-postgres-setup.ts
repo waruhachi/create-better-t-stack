@@ -8,10 +8,7 @@ import type { ORM, PackageManager, ProjectConfig } from "../../types";
 import { addPackageDependency } from "../../utils/add-package-deps";
 import { exitCancelled } from "../../utils/errors";
 import { getPackageExecutionCommand } from "../../utils/package-runner";
-import {
-	addEnvVariablesToFile,
-	type EnvVariable,
-} from "../project-generation/env-setup";
+import { addEnvVariablesToFile, type EnvVariable } from "../core/env-setup";
 
 type PrismaConfig = {
 	databaseUrl: string;
@@ -253,9 +250,8 @@ export async function setupPrismaPostgres(config: ProjectConfig) {
 		if (prismaConfig) {
 			await writeEnvFile(projectDir, prismaConfig);
 
-			await addDotenvImportToPrismaConfig(projectDir);
-
 			if (orm === "prisma") {
+				await addDotenvImportToPrismaConfig(projectDir);
 				await addPrismaAccelerateExtension(serverDir);
 			}
 			log.success(

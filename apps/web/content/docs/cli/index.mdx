@@ -35,9 +35,11 @@ create-better-t-stack [project-directory] [options]
 - `--api <type>`: `none`, `trpc`, `orpc`
 - `--db-setup <setup>`: `none`, `turso`, `d1`, `neon`, `supabase`, `prisma-postgres`, `mongodb-atlas`, `docker`
 - `--examples <types...>`: `none`, `todo`, `ai`
-- `--web-deploy <setup>`: `none`, `workers`
+- `--web-deploy <setup>`: `none`, `wrangler`, `alchemy`
+- `--server-deploy <setup>`: `none`, `wrangler`, `alchemy`
 - `--directory-conflict <strategy>`: `merge`, `overwrite`, `increment`, `error`
 - `--render-title / --no-render-title`: Show/hide ASCII art title
+- `--disable-analytics / --no-disable-analytics`: Control analytics collection
 
 See the full reference in [Options](/docs/cli/options).
 
@@ -45,7 +47,7 @@ See the full reference in [Options](/docs/cli/options).
 
 ```bash
 # Default setup with prompts
-create-better-t-stack 
+create-better-t-stack
 
 # Quick setup with defaults
 create-better-t-stack --yes
@@ -65,7 +67,8 @@ create-better-t-stack add [options]
 ### Options
 
 - `--addons <types...>`: Addons to add (see [Addons](/docs/cli/options#addons))
-- `--web-deploy <setup>`: Web deployment setup (`workers`, `none`)
+- `--web-deploy <setup>`: Web deployment setup (`none`, `wrangler`, `alchemy`)
+- `--server-deploy <setup>`: Server deployment setup (`none`, `wrangler`, `alchemy`)
 - `--project-dir <path>`: Project directory (defaults to current directory)
 - `--install`: Install dependencies after adding
 - `--package-manager <pm>`: Package manager to use
@@ -80,7 +83,7 @@ create-better-t-stack add
 create-better-t-stack add --addons pwa tauri --install
 
 # Add deployment setup
-create-better-t-stack add --web-deploy workers
+create-better-t-stack add --web-deploy wrangler
 ```
 
 ## `sponsors`

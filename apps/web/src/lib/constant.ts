@@ -346,16 +346,49 @@ export const TECH_OPTIONS: Record<
 	],
 	webDeploy: [
 		{
-			id: "workers",
-			name: "Cloudflare Workers",
-			description: "Deploy to Cloudflare Workers",
+			id: "wrangler",
+			name: "Wrangler",
+			description: "Deploy to Cloudflare Workers using Wrangler",
 			icon: `${ICON_BASE_URL}/workers.svg`,
 			color: "from-orange-400 to-orange-600",
 		},
 		{
+			id: "alchemy",
+			name: "Alchemy",
+			description: "Deploy to Cloudflare Workers using Alchemy",
+			icon: `${ICON_BASE_URL}/alchemy.png`,
+			color: "from-purple-400 to-purple-600",
+			className: "scale-150"
+		},
+		{
 			id: "none",
-			name: "No Deployment",
-			description: "Skip deployment configuration",
+			name: "None",
+			description: "Skip deployment setup",
+			icon: "",
+			color: "from-gray-400 to-gray-600",
+			default: true,
+		},
+	],
+	serverDeploy: [
+		{
+			id: "wrangler",
+			name: "Wrangler",
+			description: "Deploy to Cloudflare Workers using Wrangler",
+			icon: `${ICON_BASE_URL}/workers.svg`,
+			color: "from-orange-400 to-orange-600",
+		},
+		{
+			id: "alchemy",
+			name: "Alchemy",
+			description: "Deploy to Cloudflare Workers using Alchemy",
+			icon: `${ICON_BASE_URL}/alchemy.png`,
+			color: "from-purple-400 to-purple-600",
+			className: "scale-150"
+		},
+		{
+			id: "none",
+			name: "None",
+			description: "Skip deployment setup",
 			icon: "",
 			color: "from-gray-400 to-gray-600",
 			default: true,
@@ -670,6 +703,7 @@ export type StackState = {
 	install: string;
 	api: string;
 	webDeploy: string;
+	serverDeploy: string;
 };
 
 export const DEFAULT_STACK: StackState = {
@@ -689,6 +723,7 @@ export const DEFAULT_STACK: StackState = {
 	install: "true",
 	api: "trpc",
 	webDeploy: "none",
+	serverDeploy: "none",
 };
 
 export const isStackDefault = <K extends keyof StackState>(

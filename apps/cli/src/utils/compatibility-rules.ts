@@ -1,9 +1,11 @@
 import type {
 	Addons,
 	API,
+	Backend,
 	CLIInput,
 	Frontend,
 	ProjectConfig,
+	ServerDeploy,
 	WebDeploy,
 } from "../types";
 import { validateAddonCompatibility } from "./addon-compatibility";
@@ -252,6 +254,21 @@ export function validateWebDeployRequiresWebFrontend(
 	}
 }
 
+export function validateServerDeployRequiresBackend(
+	serverDeploy: ServerDeploy | undefined,
+	backend: Backend | undefined,
+) {
+	if (
+		serverDeploy &&
+		serverDeploy !== "none" &&
+		(!backend || backend === "none")
+	) {
+		exitWithError(
+			"'--server-deploy' requires a backend. Please select a backend or set '--server-deploy none'.",
+		);
+	}
+}
+
 export function validateAddonsAgainstFrontends(
 	addons: Addons[] = [],
 	frontends: Frontend[] = [],
@@ -295,5 +312,33 @@ export function validateExamplesCompatibility(
 		exitWithError(
 			"The 'ai' example is not compatible with the Solid frontend.",
 		);
+	}
+}
+
+export function validateAlchemyCompatibility(
+	webDeploy: WebDeploy | undefined,
+	serverDeploy: ServerDeploy | undefined,
+	frontends: Frontend[] = [],
+) {
+	const isAlchemyWebDeploy = webDeploy === "alchemy";
+	const isAlchemyServerDeploy = serverDeploy === "alchemy";
+
+	if (isAlchemyWebDeploy || isAlchemyServerDeploy) {
+		const incompatibleFrontends = frontends.filter(
+			(f) => f === "next" || f === "react-router",
+		);
+
+		if (incompatibleFrontends.length > 0) {
+			const deployType =
+				isAlchemyWebDeploy && isAlchemyServerDeploy
+					? "web and server deployment"
+					: isAlchemyWebDeploy
+						? "web deployment"
+						: "server deployment";
+
+			exitWithError(
+				`Alchemy ${deployType} is temporarily not compatible with ${incompatibleFrontends.join(" and ")} frontend(s). Please choose a different frontend or deployment option.`,
+			);
+		}
 	}
 }
