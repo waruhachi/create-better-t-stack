@@ -358,7 +358,7 @@ export const TECH_OPTIONS: Record<
 			description: "Deploy to Cloudflare Workers using Alchemy",
 			icon: `${ICON_BASE_URL}/alchemy.png`,
 			color: "from-purple-400 to-purple-600",
-			className: "scale-150"
+			className: "scale-150",
 		},
 		{
 			id: "none",
@@ -383,7 +383,7 @@ export const TECH_OPTIONS: Record<
 			description: "Deploy to Cloudflare Workers using Alchemy",
 			icon: `${ICON_BASE_URL}/alchemy.png`,
 			color: "from-purple-400 to-purple-600",
-			className: "scale-150"
+			className: "scale-150",
 		},
 		{
 			id: "none",

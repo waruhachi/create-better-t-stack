@@ -13,11 +13,11 @@ const NpmPackage = () => {
 				);
 				if (!res.ok) throw new Error("Failed to fetch version");
 				const data = await res.json();
-				const latestVersion = data[0].tag_name.split("@")[1];
+				const latestVersion = data[0].tag_name.replace(/^v/, "");
 				setVersion(latestVersion);
 			} catch (error) {
 				console.error("Error fetching NPM version:", error);
-				setVersion("?.?.?");
+				setVersion("latest");
 			}
 		};
 		getLatestVersion();

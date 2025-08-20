@@ -11,12 +11,12 @@ import {
 	incompatibleFlagsForBackend,
 	isWebFrontend,
 	validateAddonsAgainstFrontends,
+	validateAlchemyCompatibility,
 	validateApiFrontendCompatibility,
 	validateExamplesCompatibility,
 	validateServerDeployRequiresBackend,
 	validateWebDeployRequiresWebFrontend,
 	validateWorkersCompatibility,
-	validateAlchemyCompatibility,
 } from "./compatibility-rules";
 import { exitWithError } from "./errors";
 
