@@ -2,42 +2,75 @@ name: Release
 
 permissions:
   contents: write
+  pull-requests: write
+  id-token: write
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: startsWith(github.event.head_commit.message, 'chore(release):')
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Extract version from commit message
+        id: version
+        run: |
+          VERSION=$(echo "${{ github.event.head_commit.message }}" | sed -E 's/^chore\(release\): //')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        if: steps.version.outputs.version != ''
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          # Check if tag exists before creating
+          if ! git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            git tag -a "v${{ steps.version.outputs.version }}" -m "Release v${{ steps.version.outputs.version }}"
+            git push --tags
+          else
+            echo "Tag v${{ steps.version.outputs.version }} already exists, skipping creation"
+          fi
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+        if: steps.version.outputs.version != ''
         with:
           bun-version: latest
 
       - name: Install Dependencies
+        if: steps.version.outputs.version != ''
         run: bun install --frozen-lockfile
 
       - name: Build CLI
+        if: steps.version.outputs.version != ''
         run: bun run build:cli
         env:
           BTS_TELEMETRY: 1
           POSTHOG_API_KEY: ${{ secrets.POSTHOG_API_KEY }}
           POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
 
-      - name: Generate Changelog
-        run: bun run release
+      - name: Create GitHub Release
+        if: steps.version.outputs.version != ''
+        run: |
+          # Check if release exists before creating
+          if ! gh release view "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            bunx changelogithub
+          else
+            echo "Release v${{ steps.version.outputs.version }} already exists, skipping creation"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish CLI to NPM
+        if: steps.version.outputs.version != ''
         run: cd apps/cli && bun publish --access public
         env:
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}

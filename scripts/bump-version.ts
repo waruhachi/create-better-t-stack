@@ -85,8 +85,7 @@ async function main(): Promise<void> {
 	await $`bun run build:cli`;
 	await $`git add apps/cli/package.json bun.lock`;
 	await $`git commit -m "chore(release): ${newVersion}"`;
-	await $`git tag v${newVersion}`;
-	await $`git push origin v${newVersion}`;
+	await $`git push origin main`;
 
 	console.log(`✅ Released v${newVersion}`);
 }
