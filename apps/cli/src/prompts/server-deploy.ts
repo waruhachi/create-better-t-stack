@@ -43,6 +43,10 @@ export async function getServerDeploymentChoice(
 		return "none";
 	}
 
+	if (backend !== "hono") {
+		return "none";
+	}
+
 	const options: DeploymentOption[] = [];
 
 	if (runtime === "workers") {
@@ -77,7 +81,12 @@ export async function getServerDeploymentChoice(
 export async function getServerDeploymentToAdd(
 	runtime?: Runtime,
 	existingDeployment?: ServerDeploy,
+	backend?: Backend,
 ): Promise<ServerDeploy> {
+	if (backend !== "hono") {
+		return "none";
+	}
+
 	const options: DeploymentOption[] = [];
 
 	if (runtime === "workers") {

@@ -307,6 +307,7 @@ export async function addAddonsHandler(input: AddInput) {
 			const serverDeploymentPrompt = await getServerDeploymentToAdd(
 				detectedConfig.runtime,
 				detectedConfig.serverDeploy,
+				detectedConfig.backend,
 			);
 
 			if (serverDeploymentPrompt !== "none") {
