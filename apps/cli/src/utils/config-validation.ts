@@ -283,6 +283,12 @@ export function validateFullConfig(
 
 	validateWorkersCompatibility(providedFlags, options, config);
 
+	if (config.runtime === "workers" && config.serverDeploy === "none") {
+		exitWithError(
+			"Cloudflare Workers runtime requires a server deployment. Please choose 'wrangler' or 'alchemy' for --server-deploy.",
+		);
+	}
+
 	if (config.addons && config.addons.length > 0) {
 		validateAddonsAgainstFrontends(config.addons, config.frontend);
 		config.addons = [...new Set(config.addons)];

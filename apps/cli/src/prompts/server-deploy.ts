@@ -49,18 +49,18 @@ export async function getServerDeploymentChoice(
 
 	const options: DeploymentOption[] = [];
 
-	if (runtime === "workers") {
-		["alchemy", "wrangler"].forEach((deploy) => {
-			const { label, hint } = getDeploymentDisplay(deploy as ServerDeploy);
-			options.unshift({
-				value: deploy as ServerDeploy,
-				label,
-				hint,
-			});
-		});
-	} else {
-		options.push({ value: "none", label: "None", hint: "Manual setup" });
+	if (runtime !== "workers") {
+		return "none";
 	}
+
+	["alchemy", "wrangler"].forEach((deploy) => {
+		const { label, hint } = getDeploymentDisplay(deploy as ServerDeploy);
+		options.unshift({
+			value: deploy as ServerDeploy,
+			label,
+			hint,
+		});
+	});
 
 	const response = await select<ServerDeploy>({
 		message: "Select server deployment",
@@ -114,11 +114,6 @@ export async function getServerDeploymentToAdd(
 	}
 
 	if (options.length > 0) {
-		options.push({
-			value: "none",
-			label: "None",
-			hint: "Skip deployment setup",
-		});
 	}
 
 	if (options.length === 0) {

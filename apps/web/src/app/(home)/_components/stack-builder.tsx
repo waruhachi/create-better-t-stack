@@ -164,6 +164,7 @@ function TechIcon({
 
 	return (
 		<Image
+			suppressHydrationWarning
 			src={iconSrc}
 			alt={`${name} icon`}
 			width={20}
@@ -636,6 +637,21 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 					});
 				}
 
+				// Workers runtime requires a server deployment (wrangler or alchemy)
+				if (nextStack.serverDeploy === "none") {
+					notes.serverDeploy.notes.push(
+						"Cloudflare Workers runtime requires a server deployment. Wrangler will be selected.",
+					);
+					notes.serverDeploy.hasIssue = true;
+					nextStack.serverDeploy = "wrangler";
+					changed = true;
+					changes.push({
+						category: "serverDeploy",
+						message:
+							"Server deployment set to 'Wrangler' (required by Cloudflare Workers)",
+					});
+				}
+
 				if (nextStack.orm !== "drizzle" && nextStack.orm !== "none") {
 					notes.runtime.notes.push(
 						"Cloudflare Workers runtime requires Drizzle ORM or no ORM. Drizzle will be selected.",
@@ -681,7 +697,6 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 					notes.runtime.hasIssue = true;
 					notes.dbSetup.hasIssue = true;
 					nextStack.dbSetup = "d1";
-					changed = true;
 					changes.push({
 						category: "runtime",
 						message:
@@ -1811,7 +1826,13 @@ const StackBuilder = () => {
 									TECH_OPTIONS[categoryKey as keyof typeof TECH_OPTIONS] || [];
 								const categoryDisplayName = getCategoryDisplayName(categoryKey);
 
-								const filteredOptions = categoryOptions.filter(() => {
+								const filteredOptions = categoryOptions.filter((opt) => {
+									if (
+										categoryKey === "serverDeploy" &&
+										stack.runtime === "workers"
+									) {
+										return opt.id === "wrangler" || opt.id === "alchemy";
+									}
 									return true;
 								});
 
