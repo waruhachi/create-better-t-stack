@@ -1826,15 +1826,7 @@ const StackBuilder = () => {
 									TECH_OPTIONS[categoryKey as keyof typeof TECH_OPTIONS] || [];
 								const categoryDisplayName = getCategoryDisplayName(categoryKey);
 
-								const filteredOptions = categoryOptions.filter((opt) => {
-									if (
-										categoryKey === "serverDeploy" &&
-										stack.runtime === "workers"
-									) {
-										return opt.id === "wrangler" || opt.id === "alchemy";
-									}
-									return true;
-								});
+								const filteredOptions = categoryOptions;
 
 								if (filteredOptions.length === 0) return null;
 
