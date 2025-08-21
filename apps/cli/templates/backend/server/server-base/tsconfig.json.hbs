@@ -8,28 +8,23 @@
     "skipLibCheck": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
-      {{#if (eq orm "prisma")}},
-      "prisma": ["node_modules/prisma"]
-      {{/if}}
+      "@/*": ["./src/*"]{{#if (eq orm "prisma")}},
+      "prisma": ["node_modules/prisma"]{{/if}}
     },
     "outDir": "./dist",
     "types": [
       {{#if (eq runtime "node")}}
-      "node"
+        "node"
       {{else if (eq runtime "bun")}}
-      "bun"
+        "bun"
       {{else if (eq runtime "workers")}}
-      "@cloudflare/workers-types",
-      "node"
+        "node"
       {{else}}
-      "node",
-      "bun"
+        "node",
+        "bun"
       {{/if}}
-    ],
-    {{#unless (or (eq backend "convex") (eq backend "none"))}}
-    "composite": true,
-    {{/unless}}
+    ]{{#unless (or (eq backend "convex") (eq backend "none"))}},
+    "composite": true{{/unless}},
     "jsx": "react-jsx"{{#if (eq backend "hono")}},
     "jsxImportSource": "hono/jsx"{{/if}}
   }

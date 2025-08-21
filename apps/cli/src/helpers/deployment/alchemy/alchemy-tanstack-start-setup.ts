@@ -54,6 +54,24 @@ export async function setupTanStackStartAlchemyDeploy(
 				alchemyImport.setModuleSpecifier("alchemy/cloudflare/tanstack-start");
 			}
 
+			const reactImport = sourceFile.getImportDeclaration(
+				"@vitejs/plugin-react",
+			);
+			let reactPluginIdentifier = "viteReact";
+			if (!reactImport) {
+				sourceFile.addImportDeclaration({
+					moduleSpecifier: "@vitejs/plugin-react",
+					defaultImport: "viteReact",
+				});
+			} else {
+				const defaultImport = reactImport.getDefaultImport();
+				if (defaultImport) {
+					reactPluginIdentifier = defaultImport.getText();
+				} else {
+					reactImport.setDefaultImport("viteReact");
+				}
+			}
+
 			const exportAssignment = sourceFile.getExportAssignment(
 				(d) => !d.isExportEquals(),
 			);
@@ -99,6 +117,7 @@ export async function setupTanStackStartAlchemyDeploy(
 							.getElements()
 							.filter((el) => el.getText().includes("tanstackStart"));
 
+						let needsReactPlugin = false;
 						tanstackElements.forEach((element) => {
 							if (Node.isCallExpression(element)) {
 								const args = element.getArguments();
@@ -107,6 +126,7 @@ export async function setupTanStackStartAlchemyDeploy(
       target: "cloudflare-module",
       customViteReactPlugin: true,
     }`);
+									needsReactPlugin = true;
 								} else if (
 									args.length === 1 &&
 									Node.isObjectLiteralExpression(args[0])
@@ -118,15 +138,30 @@ export async function setupTanStackStartAlchemyDeploy(
 											initializer: '"cloudflare-module"',
 										});
 									}
-									if (!configObj.getProperty("customViteReactPlugin")) {
+									const hasCustomViteReactPlugin = !!configObj.getProperty(
+										"customViteReactPlugin",
+									);
+									if (!hasCustomViteReactPlugin) {
 										configObj.addPropertyAssignment({
 											name: "customViteReactPlugin",
 											initializer: "true",
 										});
 									}
+									needsReactPlugin = true;
 								}
 							}
 						});
+
+						const hasReactPlugin = initializer
+							.getElements()
+							.some(
+								(el) =>
+									Node.isCallExpression(el) &&
+									el.getExpression().getText() === reactPluginIdentifier,
+							);
+						if (needsReactPlugin && !hasReactPlugin) {
+							initializer.addElement(`${reactPluginIdentifier}()`);
+						}
 					}
 				} else {
 					configObject.addPropertyAssignment({

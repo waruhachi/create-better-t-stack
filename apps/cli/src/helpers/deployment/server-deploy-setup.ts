@@ -48,7 +48,7 @@ async function setupWorkersServerDeploy(
 	await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
 
 	await addPackageDependency({
-		devDependencies: ["wrangler", "@types/node", "@cloudflare/workers-types"],
+		devDependencies: ["wrangler", "@types/node"],
 		projectDir: serverDir,
 	});
 }
@@ -83,13 +83,7 @@ export async function setupAlchemyServerDeploy(
 	if (!(await fs.pathExists(serverDir))) return;
 
 	await addPackageDependency({
-		devDependencies: [
-			"alchemy",
-			"wrangler",
-			"@types/node",
-			"@cloudflare/workers-types",
-			"dotenv",
-		],
+		devDependencies: ["alchemy", "wrangler", "@types/node", "dotenv"],
 		projectDir: serverDir,
 	});
 
