@@ -1,5 +1,10 @@
 import path from "node:path";
-import { isCancel, log, multiselect, spinner } from "@clack/prompts";
+import {
+	isCancel,
+	log,
+	autocompleteMultiselect,
+	spinner,
+} from "@clack/prompts";
 import { execa } from "execa";
 import fs from "fs-extra";
 import pc from "picocolors";
@@ -61,14 +66,16 @@ export async function setupVibeRules(config: ProjectConfig) {
 			opencode: { label: "OpenCode" },
 		} as const;
 
-		const selectedEditors = await multiselect<keyof typeof EDITORS>({
-			message: "Select AI assistants for Ruler",
-			options: Object.entries(EDITORS).map(([key, v]) => ({
-				value: key as keyof typeof EDITORS,
-				label: v.label,
-			})),
-			required: false,
-		});
+		const selectedEditors = await autocompleteMultiselect<keyof typeof EDITORS>(
+			{
+				message: "Select AI assistants for Ruler",
+				options: Object.entries(EDITORS).map(([key, v]) => ({
+					value: key as keyof typeof EDITORS,
+					label: v.label,
+				})),
+				required: false,
+			},
+		);
 
 		if (isCancel(selectedEditors)) return exitCancelled("Operation cancelled");
 

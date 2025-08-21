@@ -60,7 +60,7 @@ export async function getProjectName(initialName?: string): Promise<string> {
 			initialValue: initialName,
 			defaultValue: defaultName,
 			validate: (value) => {
-				const nameToUse = value.trim() || defaultName;
+				const nameToUse = String(value ?? "").trim() || defaultName;
 
 				const finalDirName = path.basename(nameToUse);
 				const validationError = validateDirectoryName(finalDirName);

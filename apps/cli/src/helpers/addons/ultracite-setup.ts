@@ -1,4 +1,9 @@
-import { isCancel, log, multiselect } from "@clack/prompts";
+import {
+	autocompleteMultiselect,
+	group,
+	log,
+	multiselect,
+} from "@clack/prompts";
 import { execa } from "execa";
 import pc from "picocolors";
 import type { ProjectConfig } from "../../types";
@@ -14,43 +19,79 @@ type UltraciteRule =
 	| "windsurf"
 	| "zed"
 	| "claude"
-	| "codex";
+	| "codex"
+	| "kiro"
+	| "cline"
+	| "amp"
+	| "aider"
+	| "firebase-studio"
+	| "open-hands"
+	| "gemini-cli"
+	| "junie"
+	| "augmentcode"
+	| "kilo-code"
+	| "goose";
 
 const EDITORS = {
 	vscode: {
 		label: "VSCode / Cursor / Windsurf",
-		hint: "Visual Studio Code editor configuration",
 	},
 	zed: {
 		label: "Zed",
-		hint: "Zed editor configuration",
 	},
 } as const;
 
 const RULES = {
 	"vscode-copilot": {
 		label: "VS Code Copilot",
-		hint: "GitHub Copilot integration for VS Code",
 	},
 	cursor: {
 		label: "Cursor",
-		hint: "Cursor AI editor configuration",
 	},
 	windsurf: {
 		label: "Windsurf",
-		hint: "Windsurf editor configuration",
 	},
 	zed: {
 		label: "Zed",
-		hint: "Zed editor rules",
 	},
 	claude: {
 		label: "Claude",
-		hint: "Claude AI integration",
 	},
 	codex: {
 		label: "Codex",
-		hint: "Codex AI integration",
+	},
+	kiro: {
+		label: "Kiro",
+	},
+	cline: {
+		label: "Cline",
+	},
+	amp: {
+		label: "Amp",
+	},
+	aider: {
+		label: "Aider",
+	},
+	"firebase-studio": {
+		label: "Firebase Studio",
+	},
+	"open-hands": {
+		label: "Open Hands",
+	},
+	"gemini-cli": {
+		label: "Gemini CLI",
+	},
+	junie: {
+		label: "Junie",
+	},
+	augmentcode: {
+		label: "AugmentCode",
+	},
+	"kilo-code": {
+		label: "Kilo Code",
+	},
+	goose: {
+		label: "Goose",
 	},
 } as const;
 
@@ -62,29 +103,36 @@ export async function setupUltracite(config: ProjectConfig, hasHusky: boolean) {
 
 		await setupBiome(projectDir);
 
-		const editors = await multiselect<UltraciteEditor>({
-			message: "Choose editors",
-			options: Object.entries(EDITORS).map(([key, editor]) => ({
-				value: key as UltraciteEditor,
-				label: editor.label,
-				hint: editor.hint,
-			})),
-			required: true,
-		});
+		const result = await group(
+			{
+				editors: () =>
+					multiselect<UltraciteEditor>({
+						message: "Choose editors",
+						options: Object.entries(EDITORS).map(([key, editor]) => ({
+							value: key as UltraciteEditor,
+							label: editor.label,
+						})),
+						required: true,
+					}),
+				rules: () =>
+					autocompleteMultiselect<UltraciteRule>({
+						message: "Choose rules",
+						options: Object.entries(RULES).map(([key, rule]) => ({
+							value: key as UltraciteRule,
+							label: rule.label,
+						})),
+						required: true,
+					}),
+			},
+			{
+				onCancel: () => {
+					exitCancelled("Operation cancelled");
+				},
+			},
+		);
 
-		if (isCancel(editors)) return exitCancelled("Operation cancelled");
-
-		const rules = await multiselect<UltraciteRule>({
-			message: "Choose rules",
-			options: Object.entries(RULES).map(([key, rule]) => ({
-				value: key as UltraciteRule,
-				label: rule.label,
-				hint: rule.hint,
-			})),
-			required: true,
-		});
-
-		if (isCancel(rules)) return exitCancelled("Operation cancelled");
+		const editors = result.editors as UltraciteEditor[];
+		const rules = result.rules as UltraciteRule[];
 
 		const ultraciteArgs = ["init", "--pm", packageManager];
 
