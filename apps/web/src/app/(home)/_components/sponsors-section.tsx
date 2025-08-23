@@ -12,12 +12,15 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import {
+	calculateLifetimeContribution,
 	filterCurrentSponsors,
 	filterPastSponsors,
 	filterSpecialSponsors,
+	filterVisibleSponsors,
 	formatSponsorUrl,
 	getSponsorUrl,
 	isSpecialSponsor,
+	shouldShowLifetimeTotal,
 	sortSpecialSponsors,
 	sortSponsors,
 } from "@/lib/sponsor-utils";
@@ -100,7 +103,8 @@ export default function SponsorsSection() {
 			},
 		})) || [];
 
-	const sortedSponsors = sortSponsors(sponsors);
+	const visibleSponsors = filterVisibleSponsors(sponsors);
+	const sortedSponsors = sortSponsors(visibleSponsors);
 	const currentSponsors = filterCurrentSponsors(sortedSponsors);
 	const pastSponsors = filterPastSponsors(sortedSponsors);
 	const specialSponsors = sortSpecialSponsors(
@@ -119,11 +123,11 @@ export default function SponsorsSection() {
 				<div className="hidden h-px flex-1 bg-border sm:block" />
 				<div className="flex items-center gap-2">
 					<span className="text-muted-foreground text-xs">
-						[{sponsors.length} RECORDS]
+						[{visibleSponsors.length} RECORDS]
 					</span>
 				</div>
 			</div>
-			{sponsors.length === 0 ? (
+			{visibleSponsors.length === 0 ? (
 				<div className="space-y-4">
 					<div className="rounded border border-border p-8">
 						<div className="text-center">
@@ -205,15 +209,20 @@ export default function SponsorsSection() {
 																	{entry.tierName}
 																</p>
 															)}
+															{shouldShowLifetimeTotal(entry) && (
+																<p className="text-muted-foreground text-xs">
+																	Total: ${calculateLifetimeContribution(entry)}
+																</p>
+															)}
 														</div>
-														<div className="flex flex-col gap-1">
+														<div className="flex flex-col">
 															<a
 																href={`https://github.com/${entry.sponsor.login}`}
 																target="_blank"
 																rel="noopener noreferrer"
 																className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
 															>
-																<Github className="h-4 w-4" />
+																<Github className="size-3" />
 																<span className="truncate">
 																	{entry.sponsor.login}
 																</span>
@@ -226,7 +235,7 @@ export default function SponsorsSection() {
 																	rel="noopener noreferrer"
 																	className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
 																>
-																	<Globe className="h-4 w-4" />
+																	<Globe className="size-3" />
 																	<span className="truncate">
 																		{formatSponsorUrl(sponsorUrl)}
 																	</span>
@@ -289,15 +298,21 @@ export default function SponsorsSection() {
 																		{entry.tierName}
 																	</p>
 																)}
+																{shouldShowLifetimeTotal(entry) && (
+																	<p className="text-muted-foreground text-xs">
+																		Total: $
+																		{calculateLifetimeContribution(entry)}
+																	</p>
+																)}
 															</div>
-															<div className="flex flex-col gap-1">
+															<div className="flex flex-col">
 																<a
 																	href={`https://github.com/${entry.sponsor.login}`}
 																	target="_blank"
 																	rel="noopener noreferrer"
 																	className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
 																>
-																	<Github className="h-4 w-4" />
+																	<Github className="size-3" />
 																	<span className="truncate">
 																		{entry.sponsor.login}
 																	</span>
@@ -313,7 +328,7 @@ export default function SponsorsSection() {
 																		rel="noopener noreferrer"
 																		className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
 																	>
-																		<Globe className="h-4 w-4" />
+																		<Globe className="size-3" />
 																		<span className="truncate">
 																			{formatSponsorUrl(
 																				entry.sponsor.websiteUrl ||
@@ -414,15 +429,21 @@ export default function SponsorsSection() {
 																		{entry.tierName}
 																	</p>
 																)}
+																{!entry.isOneTime && (
+																	<p className="text-muted-foreground/50 text-xs">
+																		Total: $
+																		{calculateLifetimeContribution(entry)}
+																	</p>
+																)}
 															</div>
-															<div className="flex flex-col gap-1">
+															<div className="flex flex-col">
 																<a
 																	href={`https://github.com/${entry.sponsor.login}`}
 																	target="_blank"
 																	rel="noopener noreferrer"
 																	className="group flex items-center gap-2 text-muted-foreground/70 text-xs transition-colors hover:text-muted-foreground"
 																>
-																	<Github className="h-4 w-4" />
+																	<Github className="size-3" />
 																	<span className="truncate">
 																		{entry.sponsor.login}
 																	</span>
@@ -435,7 +456,7 @@ export default function SponsorsSection() {
 																		rel="noopener noreferrer"
 																		className="group flex items-center gap-2 text-muted-foreground/70 text-xs transition-colors hover:text-muted-foreground"
 																	>
-																		<Globe className="h-4 w-4" />
+																		<Globe className="size-3" />
 																		<span className="truncate">
 																			{formatSponsorUrl(sponsorUrl)}
 																		</span>

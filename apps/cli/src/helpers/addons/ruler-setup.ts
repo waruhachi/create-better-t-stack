@@ -1,8 +1,8 @@
 import path from "node:path";
 import {
+	autocompleteMultiselect,
 	isCancel,
 	log,
-	autocompleteMultiselect,
 	spinner,
 } from "@clack/prompts";
 import { execa } from "execa";
