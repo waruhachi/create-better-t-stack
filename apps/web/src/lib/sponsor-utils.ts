@@ -25,36 +25,71 @@ export const isSpecialSponsor = (sponsor: Sponsor): boolean => {
 
 export const sortSponsors = (sponsors: Sponsor[]): Sponsor[] => {
 	return sponsors.sort((a, b) => {
-		// Past sponsors (monthlyDollars === -1) go to the end
-		if (a.monthlyDollars === -1 && b.monthlyDollars !== -1) return 1;
-		if (a.monthlyDollars !== -1 && b.monthlyDollars === -1) return -1;
+		const aAmount = getSponsorAmount(a);
+		const bAmount = getSponsorAmount(b);
+		const aIsPast = a.monthlyDollars === -1;
+		const bIsPast = b.monthlyDollars === -1;
+		const aIsSpecial = isSpecialSponsor(a);
+		const bIsSpecial = isSpecialSponsor(b);
 
-		// If both are past sponsors, sort by creation date (newest first)
-		if (a.monthlyDollars === -1 && b.monthlyDollars === -1) {
+		// 1. Special sponsors (>=$100) come first, sorted by amount (highest first)
+		if (aIsSpecial && !bIsSpecial) return -1;
+		if (!aIsSpecial && bIsSpecial) return 1;
+		if (aIsSpecial && bIsSpecial) {
+			if (aAmount !== bAmount) {
+				return bAmount - aAmount;
+			}
+			// If amounts equal, prefer monthly over one-time
+			if (a.isOneTime && !b.isOneTime) return 1;
+			if (!a.isOneTime && b.isOneTime) return -1;
+			// Then by creation date (oldest first)
+			return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+		}
+
+		// 2. Current sponsors come before past sponsors
+		if (!aIsPast && bIsPast) return -1;
+		if (aIsPast && !bIsPast) return 1;
+
+		// 3. For current sponsors, sort by amount (highest first)
+		if (!aIsPast && !bIsPast) {
+			if (aAmount !== bAmount) {
+				return bAmount - aAmount;
+			}
+			// If amounts equal, prefer monthly over one-time
+			if (a.isOneTime && !b.isOneTime) return 1;
+			if (!a.isOneTime && b.isOneTime) return -1;
+			// Then by creation date (oldest first)
+			return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+		}
+
+		// 4. For past sponsors, sort by amount (highest first)
+		if (aIsPast && bIsPast) {
+			if (aAmount !== bAmount) {
+				return bAmount - aAmount;
+			}
+			// Then by creation date (newest first)
 			return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 		}
 
-		// For current sponsors, sort by actual amount (highest first)
-		const aAmount = getSponsorAmount(a);
-		const bAmount = getSponsorAmount(b);
-		if (aAmount !== bAmount) {
-			return bAmount - aAmount;
-		}
-
-		// If amounts are equal, sort by creation date (oldest first)
-		return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+		return 0;
 	});
 };
 
 export const sortSpecialSponsors = (sponsors: Sponsor[]): Sponsor[] => {
 	return sponsors.sort((a, b) => {
-		// Sort by actual amount (highest first)
 		const aAmount = getSponsorAmount(a);
 		const bAmount = getSponsorAmount(b);
+
+		// Sort by actual amount (highest first)
 		if (aAmount !== bAmount) {
 			return bAmount - aAmount;
 		}
-		// If amounts are equal, sort by creation date (oldest first)
+
+		// If amounts equal, prefer monthly over one-time
+		if (a.isOneTime && !b.isOneTime) return 1;
+		if (!a.isOneTime && b.isOneTime) return -1;
+
+		// Then by creation date (oldest first)
 		return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 	});
 };
