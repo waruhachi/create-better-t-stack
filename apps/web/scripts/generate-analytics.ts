@@ -35,6 +35,8 @@ interface AggregatedAnalyticsData {
 	addonsDistribution: Array<{ name: string; value: number }>;
 	runtimeDistribution: Array<{ name: string; value: number }>;
 	projectTypeDistribution: Array<{ name: string; value: number }>;
+	webDeployDistribution: Array<{ name: string; value: number }>;
+	serverDeployDistribution: Array<{ name: string; value: number }>;
 	popularStackCombinations: Array<{ name: string; value: number }>;
 	databaseORMCombinations: Array<{ name: string; value: number }>;
 	hourlyDistribution: Array<{
@@ -51,6 +53,8 @@ interface AggregatedAnalyticsData {
 		mostPopularORM: string;
 		mostPopularAPI: string;
 		mostPopularPackageManager: string;
+		mostPopularWebDeploy: string;
+		mostPopularServerDeploy: string;
 	};
 }
 
@@ -127,6 +131,8 @@ async function generateAnalyticsData() {
 		const addonsCounts: Record<string, number> = {};
 		const runtimeCounts: Record<string, number> = {};
 		const projectTypeCounts: Record<string, number> = {};
+		const webDeployCounts: Record<string, number> = {};
+		const serverDeployCounts: Record<string, number> = {};
 		const stackComboCounts: Record<string, number> = {};
 		const dbORMComboCounts: Record<string, number> = {};
 		const hourlyCounts: Record<number, number> = {};
@@ -285,6 +291,18 @@ async function generateAnalyticsData() {
 						// Runtime
 						const runtime = row["*.properties.runtime"] || "unknown";
 						runtimeCounts[runtime] = (runtimeCounts[runtime] || 0) + 1;
+
+						// Web Deploy (migrate "workers" to "wrangler")
+						const webDeploy = row["*.properties.webDeploy"] || "none";
+						const normalizedWebDeploy =
+							webDeploy === "workers" ? "wrangler" : webDeploy;
+						webDeployCounts[normalizedWebDeploy] =
+							(webDeployCounts[normalizedWebDeploy] || 0) + 1;
+
+						// Server Deploy
+						const serverDeploy = row["*.properties.serverDeploy"] || "none";
+						serverDeployCounts[serverDeploy] =
+							(serverDeployCounts[serverDeploy] || 0) + 1;
 
 						// Project type
 						const hasFrontend =
@@ -492,6 +510,16 @@ async function generateAnalyticsData() {
 			runtimeDistribution: Object.entries(runtimeCounts)
 				.map(([name, value]) => ({ name, value }))
 				.sort((a, b) => b.value - a.value),
+			// Compare only actual deployment platforms (exclude "none")
+			webDeployDistribution: [
+				{ name: "wrangler", value: webDeployCounts.wrangler || 0 },
+				{ name: "alchemy", value: webDeployCounts.alchemy || 0 },
+			].sort((a, b) => b.value - a.value),
+			serverDeployDistribution: [
+				{ name: "wrangler", value: serverDeployCounts.wrangler || 0 },
+				{ name: "alchemy", value: serverDeployCounts.alchemy || 0 },
+			].sort((a, b) => b.value - a.value),
+
 			projectTypeDistribution: Object.entries(projectTypeCounts).map(
 				([name, value]) => ({ name, value }),
 			),
@@ -517,6 +545,8 @@ async function generateAnalyticsData() {
 				mostPopularORM: getMostPopular(ormCounts),
 				mostPopularAPI: getMostPopular(apiCounts),
 				mostPopularPackageManager: getMostPopular(packageManagerCounts),
+				mostPopularWebDeploy: getMostPopular(webDeployCounts),
+				mostPopularServerDeploy: getMostPopular(serverDeployCounts),
 			},
 		};
 

@@ -31,10 +31,8 @@ function TechIcon({
 }) {
 	const { theme } = useTheme();
 
-	// If no icon, return empty
 	if (!icon) return null;
 
-	// If it's an emoji or text icon, render as span
 	if (!icon.startsWith("https://")) {
 		return (
 			<span
@@ -48,7 +46,6 @@ function TechIcon({
 		);
 	}
 
-	// Handle light theme variants
 	let iconSrc = icon;
 	if (
 		theme === "light" &&
@@ -59,7 +56,6 @@ function TechIcon({
 		iconSrc = icon.replace(".svg", "-light.svg");
 	}
 
-	// Render as image
 	return (
 		<Image
 			src={iconSrc}

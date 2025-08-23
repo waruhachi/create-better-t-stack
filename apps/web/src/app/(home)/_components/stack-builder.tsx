@@ -637,7 +637,6 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 					});
 				}
 
-				// Workers runtime requires a server deployment (wrangler or alchemy)
 				if (nextStack.serverDeploy === "none") {
 					notes.serverDeploy.notes.push(
 						"Cloudflare Workers runtime requires a server deployment. Wrangler will be selected.",
@@ -898,7 +897,6 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 		});
 	}
 
-	// Server deployment requires a backend (and not Convex)
 	if (
 		nextStack.serverDeploy !== "none" &&
 		(nextStack.backend === "none" || nextStack.backend === "convex")
@@ -919,7 +917,6 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 		});
 	}
 
-	// Cloudflare server deployments (wrangler/alchemy) require Workers runtime
 	if (nextStack.serverDeploy !== "none" && nextStack.runtime !== "workers") {
 		notes.serverDeploy.notes.push(
 			"Selected server deployment targets Cloudflare Workers. Runtime will be set to 'Cloudflare Workers'.",
@@ -937,7 +934,6 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 				"Runtime set to 'Cloudflare Workers' (required by server deployment)",
 		});
 
-		// Apply Workers runtime compatibility adjustments
 		if (nextStack.backend !== "hono") {
 			notes.runtime.notes.push(
 				"Cloudflare Workers runtime requires Hono backend. Hono will be selected.",
@@ -1004,7 +1000,6 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 		}
 	}
 
-	// Alchemy deployment validation - temporarily not compatible with Next.js and React Router
 	const isAlchemyWebDeploy = nextStack.webDeploy === "alchemy";
 	const isAlchemyServerDeploy = nextStack.serverDeploy === "alchemy";
 
@@ -1034,12 +1029,10 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 			notes.webDeploy.hasIssue = true;
 			notes.serverDeploy.hasIssue = true;
 
-			// Remove incompatible frontends
 			nextStack.webFrontend = nextStack.webFrontend.filter(
 				(f) => f !== "next" && f !== "react-router",
 			);
 
-			// If no web frontends remain, set to default
 			if (nextStack.webFrontend.length === 0) {
 				nextStack.webFrontend = ["tanstack-router"];
 			}
@@ -1639,7 +1632,6 @@ const StackBuilder = () => {
 		const { adjustedStack } = analyzeStackCompatibility(simulatedStack);
 		const finalStack = adjustedStack ?? simulatedStack;
 
-		// Additional check for Alchemy compatibility with Next.js and React Router
 		if (
 			category === "webFrontend" &&
 			(optionId === "next" || optionId === "react-router")

@@ -27,6 +27,8 @@ import {
 	getPopularStackCombinations,
 	getProjectTypeData,
 	getRuntimeData,
+	getServerDeployData,
+	getWebDeployData,
 } from "./data-utils";
 import type { AggregatedAnalyticsData } from "./types";
 import {
@@ -39,6 +41,8 @@ import {
 	ormConfig,
 	projectTypeConfig,
 	runtimeConfig,
+	serverDeployConfig,
+	webDeployConfig,
 } from "./types";
 
 interface StackConfigurationChartsProps {
@@ -57,6 +61,8 @@ export function StackConfigurationCharts({
 	const authData = getAuthData(data);
 	const runtimeData = getRuntimeData(data);
 	const projectTypeData = getProjectTypeData(data);
+	const webDeployData = getWebDeployData(data);
+	const serverDeployData = getServerDeployData(data);
 	const popularStackCombinations = getPopularStackCombinations(data);
 	const databaseORMCombinations = getDatabaseORMCombinations(data);
 
@@ -537,6 +543,108 @@ export function StackConfigurationCharts({
 														: entry.name === "backend-only"
 															? "hsl(var(--chart-3))"
 															: "hsl(var(--chart-4))"
+											}
+										/>
+									))}
+								</Pie>
+								<ChartLegend content={<ChartLegendContent />} />
+							</PieChart>
+						</ChartContainer>
+					</div>
+				</div>
+
+				<div className="rounded border border-border">
+					<div className="border-border border-b px-4 py-3">
+						<div className="flex items-center gap-2">
+							<span className="text-primary text-xs">▶</span>
+							<span className="font-semibold text-sm">
+								WEB_DEPLOYMENT_COMPARISON.PIE
+							</span>
+						</div>
+						<p className="mt-1 text-muted-foreground text-xs">
+							Web deployment platform comparison (Wrangler vs Alchemy)
+						</p>
+					</div>
+					<div className="p-4">
+						<ChartContainer
+							config={webDeployConfig}
+							className="h-[300px] w-full"
+						>
+							<PieChart>
+								<ChartTooltip
+									content={<ChartTooltipContent nameKey="name" />}
+								/>
+								<Pie
+									data={webDeployData}
+									dataKey="value"
+									nameKey="name"
+									cx="50%"
+									cy="50%"
+									outerRadius={80}
+									label={({ name, percent }) =>
+										`${name} ${(percent * 100).toFixed(0)}%`
+									}
+								>
+									{webDeployData.map((entry) => (
+										<Cell
+											key={`web-deploy-${entry.name}`}
+											fill={
+												entry.name === "wrangler"
+													? "hsl(var(--chart-1))"
+													: entry.name === "alchemy"
+														? "hsl(var(--chart-2))"
+														: "hsl(var(--chart-3))"
+											}
+										/>
+									))}
+								</Pie>
+								<ChartLegend content={<ChartLegendContent />} />
+							</PieChart>
+						</ChartContainer>
+					</div>
+				</div>
+
+				<div className="rounded border border-border">
+					<div className="border-border border-b px-4 py-3">
+						<div className="flex items-center gap-2">
+							<span className="text-primary text-xs">▶</span>
+							<span className="font-semibold text-sm">
+								SERVER_DEPLOYMENT_COMPARISON.PIE
+							</span>
+						</div>
+						<p className="mt-1 text-muted-foreground text-xs">
+							Server deployment platform comparison (Wrangler vs Alchemy)
+						</p>
+					</div>
+					<div className="p-4">
+						<ChartContainer
+							config={serverDeployConfig}
+							className="h-[300px] w-full"
+						>
+							<PieChart>
+								<ChartTooltip
+									content={<ChartTooltipContent nameKey="name" />}
+								/>
+								<Pie
+									data={serverDeployData}
+									dataKey="value"
+									nameKey="name"
+									cx="50%"
+									cy="50%"
+									outerRadius={80}
+									label={({ name, percent }) =>
+										`${name} ${(percent * 100).toFixed(0)}%`
+									}
+								>
+									{serverDeployData.map((entry) => (
+										<Cell
+											key={`server-deploy-${entry.name}`}
+											fill={
+												entry.name === "wrangler"
+													? "hsl(var(--chart-1))"
+													: entry.name === "alchemy"
+														? "hsl(var(--chart-2))"
+														: "hsl(var(--chart-3))"
 											}
 										/>
 									))}

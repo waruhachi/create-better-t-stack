@@ -90,6 +90,34 @@ export const getProjectTypeData = (data: AggregatedAnalyticsData | null) => {
 	return data.projectTypeDistribution || [];
 };
 
+export const getWebDeployData = (data: AggregatedAnalyticsData | null) => {
+	if (!data) return [];
+
+	const filteredData = (data.webDeployDistribution || []).filter(
+		(item) => item.name !== "none",
+	);
+
+	const wranglerCount = filteredData
+		.filter((item) => item.name === "wrangler" || item.name === "workers")
+		.reduce((sum, item) => sum + item.value, 0);
+
+	const alchemyCount = filteredData
+		.filter((item) => item.name === "alchemy")
+		.reduce((sum, item) => sum + item.value, 0);
+
+	return [
+		{ name: "wrangler", value: wranglerCount },
+		{ name: "alchemy", value: alchemyCount },
+	].filter((item) => item.value > 0);
+};
+
+export const getServerDeployData = (data: AggregatedAnalyticsData | null) => {
+	if (!data) return [];
+	return (data.serverDeployDistribution || []).filter(
+		(item) => item.name !== "none",
+	);
+};
+
 export const getMonthlyTimeSeriesData = (
 	data: AggregatedAnalyticsData | null,
 ) => {

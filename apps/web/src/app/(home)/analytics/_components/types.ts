@@ -27,6 +27,8 @@ export interface AggregatedAnalyticsData {
 	addonsDistribution: Array<{ name: string; value: number }>;
 	runtimeDistribution: Array<{ name: string; value: number }>;
 	projectTypeDistribution: Array<{ name: string; value: number }>;
+	webDeployDistribution: Array<{ name: string; value: number }>;
+	serverDeployDistribution: Array<{ name: string; value: number }>;
 	popularStackCombinations: Array<{ name: string; value: number }>;
 	databaseORMCombinations: Array<{ name: string; value: number }>;
 	hourlyDistribution: Array<{
@@ -43,6 +45,8 @@ export interface AggregatedAnalyticsData {
 		mostPopularORM: string;
 		mostPopularAPI: string;
 		mostPopularPackageManager: string;
+		mostPopularWebDeploy: string;
+		mostPopularServerDeploy: string;
 	};
 }
 
@@ -393,6 +397,28 @@ export const projectTypeConfig = {
 	none: {
 		label: "None",
 		color: "hsl(var(--chart-4))",
+	},
+} satisfies ChartConfig;
+
+export const webDeployConfig = {
+	wrangler: {
+		label: "Cloudflare Wrangler",
+		color: "hsl(var(--chart-1))",
+	},
+	alchemy: {
+		label: "Alchemy",
+		color: "hsl(var(--chart-2))",
+	},
+} satisfies ChartConfig;
+
+export const serverDeployConfig = {
+	wrangler: {
+		label: "Cloudflare Wrangler",
+		color: "hsl(var(--chart-1))",
+	},
+	alchemy: {
+		label: "Alchemy",
+		color: "hsl(var(--chart-2))",
 	},
 } satisfies ChartConfig;
 
