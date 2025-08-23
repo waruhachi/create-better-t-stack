@@ -71,13 +71,19 @@ async function updateRootPackageJson(
 		}
 		if (needsDbScripts) {
 			scripts["db:push"] = `turbo -F ${backendPackageName} db:push`;
-			scripts["db:studio"] = `turbo -F ${backendPackageName} db:studio`;
+			if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+				scripts["db:studio"] = `turbo -F ${backendPackageName} db:studio`;
+			}
 			if (options.orm === "prisma") {
 				scripts["db:generate"] = `turbo -F ${backendPackageName} db:generate`;
-				scripts["db:migrate"] = `turbo -F ${backendPackageName} db:migrate`;
+				if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+					scripts["db:migrate"] = `turbo -F ${backendPackageName} db:migrate`;
+				}
 			} else if (options.orm === "drizzle") {
 				scripts["db:generate"] = `turbo -F ${backendPackageName} db:generate`;
-				scripts["db:migrate"] = `turbo -F ${backendPackageName} db:migrate`;
+				if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+					scripts["db:migrate"] = `turbo -F ${backendPackageName} db:migrate`;
+				}
 			}
 		}
 		if (options.dbSetup === "docker") {
@@ -98,17 +104,23 @@ async function updateRootPackageJson(
 		}
 		if (needsDbScripts) {
 			scripts["db:push"] = `pnpm --filter ${backendPackageName} db:push`;
-			scripts["db:studio"] = `pnpm --filter ${backendPackageName} db:studio`;
+			if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+				scripts["db:studio"] = `pnpm --filter ${backendPackageName} db:studio`;
+			}
 			if (options.orm === "prisma") {
 				scripts["db:generate"] =
 					`pnpm --filter ${backendPackageName} db:generate`;
-				scripts["db:migrate"] =
-					`pnpm --filter ${backendPackageName} db:migrate`;
+				if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+					scripts["db:migrate"] =
+						`pnpm --filter ${backendPackageName} db:migrate`;
+				}
 			} else if (options.orm === "drizzle") {
 				scripts["db:generate"] =
 					`pnpm --filter ${backendPackageName} db:generate`;
-				scripts["db:migrate"] =
-					`pnpm --filter ${backendPackageName} db:migrate`;
+				if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+					scripts["db:migrate"] =
+						`pnpm --filter ${backendPackageName} db:migrate`;
+				}
 			}
 		}
 		if (options.dbSetup === "docker") {
@@ -130,18 +142,24 @@ async function updateRootPackageJson(
 		}
 		if (needsDbScripts) {
 			scripts["db:push"] = `npm run db:push --workspace ${backendPackageName}`;
-			scripts["db:studio"] =
-				`npm run db:studio --workspace ${backendPackageName}`;
+			if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+				scripts["db:studio"] =
+					`npm run db:studio --workspace ${backendPackageName}`;
+			}
 			if (options.orm === "prisma") {
 				scripts["db:generate"] =
 					`npm run db:generate --workspace ${backendPackageName}`;
-				scripts["db:migrate"] =
-					`npm run db:migrate --workspace ${backendPackageName}`;
+				if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+					scripts["db:migrate"] =
+						`npm run db:migrate --workspace ${backendPackageName}`;
+				}
 			} else if (options.orm === "drizzle") {
 				scripts["db:generate"] =
 					`npm run db:generate --workspace ${backendPackageName}`;
-				scripts["db:migrate"] =
-					`npm run db:migrate --workspace ${backendPackageName}`;
+				if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+					scripts["db:migrate"] =
+						`npm run db:migrate --workspace ${backendPackageName}`;
+				}
 			}
 		}
 		if (options.dbSetup === "docker") {
@@ -164,17 +182,24 @@ async function updateRootPackageJson(
 		}
 		if (needsDbScripts) {
 			scripts["db:push"] = `bun run --filter ${backendPackageName} db:push`;
-			scripts["db:studio"] = `bun run --filter ${backendPackageName} db:studio`;
+			if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+				scripts["db:studio"] =
+					`bun run --filter ${backendPackageName} db:studio`;
+			}
 			if (options.orm === "prisma") {
 				scripts["db:generate"] =
 					`bun run --filter ${backendPackageName} db:generate`;
-				scripts["db:migrate"] =
-					`bun run --filter ${backendPackageName} db:migrate`;
+				if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+					scripts["db:migrate"] =
+						`bun run --filter ${backendPackageName} db:migrate`;
+				}
 			} else if (options.orm === "drizzle") {
 				scripts["db:generate"] =
 					`bun run --filter ${backendPackageName} db:generate`;
-				scripts["db:migrate"] =
-					`bun run --filter ${backendPackageName} db:migrate`;
+				if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+					scripts["db:migrate"] =
+						`bun run --filter ${backendPackageName} db:migrate`;
+				}
 			}
 		}
 		if (options.dbSetup === "docker") {
@@ -249,14 +274,22 @@ async function updateServerPackageJson(
 
 		if (options.orm === "prisma") {
 			scripts["db:push"] = "prisma db push";
-			scripts["db:studio"] = "prisma studio";
+			if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+				scripts["db:studio"] = "prisma studio";
+			}
 			scripts["db:generate"] = "prisma generate";
-			scripts["db:migrate"] = "prisma migrate dev";
+			if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+				scripts["db:migrate"] = "prisma migrate dev";
+			}
 		} else if (options.orm === "drizzle") {
 			scripts["db:push"] = "drizzle-kit push";
-			scripts["db:studio"] = "drizzle-kit studio";
+			if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+				scripts["db:studio"] = "drizzle-kit studio";
+			}
 			scripts["db:generate"] = "drizzle-kit generate";
-			scripts["db:migrate"] = "drizzle-kit migrate";
+			if (!(options.dbSetup === "d1" && options.serverDeploy === "alchemy")) {
+				scripts["db:migrate"] = "drizzle-kit migrate";
+			}
 		}
 	}
 

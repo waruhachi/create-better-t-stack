@@ -29,7 +29,12 @@ export async function displayPostInstallInstructions(
 	} = config;
 
 	const isConvex = backend === "convex";
-	const runCmd = packageManager === "npm" ? "npm run" : packageManager;
+	const runCmd =
+		packageManager === "npm"
+			? "npm run"
+			: packageManager === "pnpm"
+				? "pnpm run"
+				: "bun run";
 	const cdCmd = `cd ${relativePath}`;
 	const hasHuskyOrBiome =
 		addons?.includes("husky") || addons?.includes("biome");
@@ -253,7 +258,7 @@ async function getDatabaseInstructions(
 		);
 		instructions.push(
 			`${pc.cyan("4.")} Generate migrations: ${pc.white(
-				`cd apps/server && ${packageManager} db:generate`,
+				`cd apps/server && ${runCmd} db:generate`,
 			)}`,
 		);
 		instructions.push(
@@ -269,6 +274,11 @@ async function getDatabaseInstructions(
 	}
 
 	if (dbSetup === "d1" && serverDeploy === "alchemy") {
+		instructions.push(
+			`${pc.yellow(
+				"NOTE:",
+			)} D1 migrations are automatically handled by Alchemy`,
+		);
 	}
 
 	if (orm === "prisma") {
@@ -293,7 +303,11 @@ async function getDatabaseInstructions(
 			);
 		}
 		instructions.push(`${pc.cyan("•")} Apply schema: ${`${runCmd} db:push`}`);
-		instructions.push(`${pc.cyan("•")} Database UI: ${`${runCmd} db:studio`}`);
+		if (!(dbSetup === "d1" && serverDeploy === "alchemy")) {
+			instructions.push(
+				`${pc.cyan("•")} Database UI: ${`${runCmd} db:studio`}`,
+			);
+		}
 	} else if (orm === "drizzle") {
 		if (dbSetup === "docker") {
 			instructions.push(
@@ -303,7 +317,11 @@ async function getDatabaseInstructions(
 		if (dbSetup !== "d1") {
 			instructions.push(`${pc.cyan("•")} Apply schema: ${`${runCmd} db:push`}`);
 		}
-		instructions.push(`${pc.cyan("•")} Database UI: ${`${runCmd} db:studio`}`);
+		if (!(dbSetup === "d1" && serverDeploy === "alchemy")) {
+			instructions.push(
+				`${pc.cyan("•")} Database UI: ${`${runCmd} db:studio`}`,
+			);
+		}
 		if (database === "sqlite" && dbSetup !== "d1") {
 			instructions.push(
 				`${pc.cyan(
@@ -394,15 +412,15 @@ function getAlchemyDeployInstructions(
 
 	if (webDeploy === "alchemy" && serverDeploy !== "alchemy") {
 		instructions.push(
-			`${pc.bold("Deploy web to Alchemy:")}\n${pc.cyan("•")} Deploy: ${`cd apps/web && ${runCmd} deploy`}`,
+			`${pc.bold("Deploy web with Alchemy:")}\n${pc.cyan("•")} Dev: ${`cd apps/web && ${runCmd} alchemy:dev`}\n${pc.cyan("•")} Deploy: ${`cd apps/web && ${runCmd} deploy`}\n${pc.cyan("•")} Destroy: ${`cd apps/web && ${runCmd} destroy`}`,
 		);
 	} else if (serverDeploy === "alchemy" && webDeploy !== "alchemy") {
 		instructions.push(
-			`${pc.bold("Deploy server to Alchemy:")}\n${pc.cyan("•")} Deploy: ${`cd apps/server && ${runCmd} deploy`}`,
+			`${pc.bold("Deploy server with Alchemy:")}\n${pc.cyan("•")} Dev: ${`cd apps/server && ${runCmd} alchemy:dev`}\n${pc.cyan("•")} Deploy: ${`cd apps/server && ${runCmd} deploy`}\n${pc.cyan("•")} Destroy: ${`cd apps/server && ${runCmd} destroy`}`,
 		);
 	} else if (webDeploy === "alchemy" && serverDeploy === "alchemy") {
 		instructions.push(
-			`${pc.bold("Deploy to Alchemy:")}\n${pc.cyan("•")} Deploy: ${`${runCmd} deploy`}`,
+			`${pc.bold("Deploy with Alchemy:")}\n${pc.cyan("•")} Dev: ${`${runCmd} alchemy:dev`}\n${pc.cyan("•")} Deploy: ${`${runCmd} deploy`}\n${pc.cyan("•")} Destroy: ${`${runCmd} destroy`}`,
 		);
 	}
 
