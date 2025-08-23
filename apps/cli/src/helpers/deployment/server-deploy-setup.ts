@@ -83,7 +83,13 @@ export async function setupAlchemyServerDeploy(
 	if (!(await fs.pathExists(serverDir))) return;
 
 	await addPackageDependency({
-		devDependencies: ["alchemy", "wrangler", "@types/node", "dotenv"],
+		devDependencies: [
+			"alchemy",
+			"wrangler",
+			"@types/node",
+			"dotenv",
+			"@cloudflare/workers-types",
+		],
 		projectDir: serverDir,
 	});
 

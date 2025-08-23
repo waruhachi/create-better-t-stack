@@ -22,7 +22,8 @@
       {{else}}
         "node",
         "bun"
-      {{/if}}
+      {{/if}}{{#if (eq serverDeploy "alchemy")}},
+      "@cloudflare/workers-types"{{/if}}
     ]{{#unless (or (eq backend "convex") (eq backend "none"))}},
     "composite": true{{/unless}},
     "jsx": "react-jsx"{{#if (eq backend "hono")}},
