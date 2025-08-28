@@ -122,15 +122,6 @@ export async function displayPostInstallInstructions(
 			"   (this will guide you through Convex project setup)",
 		)}\n`;
 
-		if (config.auth === "clerk") {
-			output += `${pc.cyan(`${stepCounter++}.`)} ${pc.bold("Clerk Setup:")}\n${pc.dim(
-				"   Follow the Convex + Clerk guide to configure authentication:",
-			)}\n${pc.cyan("   ")}${pc.underline("https://docs.convex.dev/auth/clerk")}\n\n`;
-			output += `${pc.cyan(`${stepCounter++}.`)} ${pc.bold("Required Environment Variables:")}\n`;
-			output += `${pc.dim("   •")} Set CLERK_JWT_ISSUER_DOMAIN in Convex Dashboard\n`;
-			output += `${pc.dim("   •")} Set CLERK_PUBLISHABLE_KEY in apps/*/.env\n`;
-		}
-
 		output += `${pc.cyan(
 			`${stepCounter++}.`,
 		)} Copy environment variables from\n${pc.white(
@@ -417,7 +408,7 @@ function getWranglerDeployInstructions(
 }
 
 function getClerkInstructions(): string {
-	return `${pc.bold("Clerk Authentication Setup:")}\n${pc.cyan("1.")} Sign up for Clerk at ${pc.underline("https://clerk.com/sign-up")}\n${pc.cyan("2.")} Create a new application in Clerk Dashboard\n${pc.cyan("3.")} Create a JWT template named ${pc.bold("'convex'")} (exact name required)\n${pc.cyan("4.")} Copy your Clerk Frontend API URL (Issuer URL)\n${pc.cyan("5.")} Set environment variables:\n${pc.dim("   •")} CLERK_JWT_ISSUER_DOMAIN in Convex Dashboard\n${pc.dim("   •")} CLERK_PUBLISHABLE_KEY in apps/*/.env\n${pc.cyan("6.")} Follow the complete guide: ${pc.underline("https://docs.convex.dev/auth/clerk")}\n${pc.yellow("NOTE:")} Use Convex's <Authenticated> components instead of Clerk's <SignedIn>`;
+	return `${pc.bold("Clerk Authentication Setup:")}\n${pc.cyan("•")} Follow the guide: ${pc.underline("https://docs.convex.dev/auth/clerk")}\n${pc.cyan("•")} Set CLERK_JWT_ISSUER_DOMAIN in Convex Dashboard\n${pc.cyan("•")} Set CLERK_PUBLISHABLE_KEY in apps/*/.env`;
 }
 
 function getAlchemyDeployInstructions(
