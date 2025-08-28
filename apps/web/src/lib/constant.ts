@@ -602,6 +602,8 @@ export const PRESET_TEMPLATES = [
 			git: "true",
 			install: "true",
 			api: "trpc",
+			webDeploy: "none",
+			serverDeploy: "none",
 		},
 	},
 	{
@@ -624,6 +626,8 @@ export const PRESET_TEMPLATES = [
 			git: "true",
 			install: "true",
 			api: "none",
+			webDeploy: "none",
+			serverDeploy: "none",
 		},
 	},
 	{
@@ -646,6 +650,8 @@ export const PRESET_TEMPLATES = [
 			git: "true",
 			install: "true",
 			api: "trpc",
+			webDeploy: "none",
+			serverDeploy: "none",
 		},
 	},
 	{
@@ -668,6 +674,8 @@ export const PRESET_TEMPLATES = [
 			git: "true",
 			install: "true",
 			api: "trpc",
+			webDeploy: "none",
+			serverDeploy: "none",
 		},
 	},
 	{
@@ -690,6 +698,8 @@ export const PRESET_TEMPLATES = [
 			git: "true",
 			install: "true",
 			api: "trpc",
+			webDeploy: "alchemy",
+			serverDeploy: "alchemy",
 		},
 	},
 ];
@@ -757,13 +767,18 @@ export const isStackDefault = <K extends keyof StackState>(
 			return true;
 	}
 
-	if (key === "webFrontend" && stack.webFrontend) {
-		if (key === "webFrontend") {
-			const defaultWeb = (DEFAULT_STACK.webFrontend as string[]).sort();
-			const valueWeb = (value as string[]).sort();
+	if (
+		key === "webFrontend" ||
+		key === "nativeFrontend" ||
+		key === "addons" ||
+		key === "examples"
+	) {
+		if (Array.isArray(defaultValue) && Array.isArray(value)) {
+			const sortedDefault = [...defaultValue].sort();
+			const sortedValue = [...value].sort();
 			return (
-				defaultWeb.length === valueWeb.length &&
-				defaultWeb.every((item, index) => item === valueWeb[index])
+				sortedDefault.length === sortedValue.length &&
+				sortedDefault.every((item, index) => item === sortedValue[index])
 			);
 		}
 	}
@@ -776,5 +791,6 @@ export const isStackDefault = <K extends keyof StackState>(
 			sortedDefault.every((item, index) => item === sortedValue[index])
 		);
 	}
+
 	return defaultValue === value;
 };

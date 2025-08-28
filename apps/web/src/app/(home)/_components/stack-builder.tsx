@@ -741,35 +741,52 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 			}
 
 			if (nextStack.auth === "clerk") {
-				const hasClerkCompatibleFrontend =
-					nextStack.webFrontend.some((f) =>
-						[
-							"tanstack-router",
-							"react-router",
-							"tanstack-start",
-							"next",
-						].includes(f),
-					) ||
-					nextStack.nativeFrontend.some((f) =>
-						["native-nativewind", "native-unistyles"].includes(f),
-					);
-
-				if (!hasClerkCompatibleFrontend) {
+				if (nextStack.backend !== "convex") {
 					notes.auth.notes.push(
-						"Clerk auth is not compatible with the selected frontends. Auth will be set to 'None'.",
+						"Clerk auth is only available with Convex backend. Auth will be set to 'None'.",
 					);
-					notes.webFrontend.notes.push(
-						"Selected frontends are not compatible with Clerk auth. Auth will be disabled.",
+					notes.backend.notes.push(
+						"Clerk auth requires Convex backend. Auth will be disabled.",
 					);
 					notes.auth.hasIssue = true;
-					notes.webFrontend.hasIssue = true;
+					notes.backend.hasIssue = true;
 					nextStack.auth = "none";
 					changed = true;
 					changes.push({
 						category: "auth",
-						message:
-							"Auth set to 'None' (Clerk not compatible with selected frontends)",
+						message: "Auth set to 'None' (Clerk only available with Convex)",
 					});
+				} else {
+					const hasClerkCompatibleFrontend =
+						nextStack.webFrontend.some((f) =>
+							[
+								"tanstack-router",
+								"react-router",
+								"tanstack-start",
+								"next",
+							].includes(f),
+						) ||
+						nextStack.nativeFrontend.some((f) =>
+							["native-nativewind", "native-unistyles"].includes(f),
+						);
+
+					if (!hasClerkCompatibleFrontend) {
+						notes.auth.notes.push(
+							"Clerk auth is not compatible with the selected frontends. Auth will be set to 'None'.",
+						);
+						notes.webFrontend.notes.push(
+							"Selected frontends are not compatible with Clerk auth. Auth will be disabled.",
+						);
+						notes.auth.hasIssue = true;
+						notes.webFrontend.hasIssue = true;
+						nextStack.auth = "none";
+						changed = true;
+						changes.push({
+							category: "auth",
+							message:
+								"Auth set to 'None' (Clerk not compatible with selected frontends)",
+						});
+					}
 				}
 			}
 
@@ -1131,100 +1148,64 @@ const generateCommand = (stackState: StackState): string => {
 	}
 
 	const projectName = stackState.projectName || "my-better-t-app";
-	const flags: string[] = ["--yes"];
+	const flags: string[] = [];
 
-	const checkDefault = <K extends keyof StackState>(
-		key: K,
-		value: StackState[K],
-	) => isStackDefault(stackState, key, value);
+	const isDefaultStack = Object.keys(DEFAULT_STACK).every((key) => {
+		if (key === "projectName") return true;
+		const defaultKey = key as keyof StackState;
+		return isStackDefault(stackState, defaultKey, stackState[defaultKey]);
+	});
 
-	const combinedFrontends = [
-		...stackState.webFrontend,
-		...stackState.nativeFrontend,
-	].filter((v, _, arr) => v !== "none" || arr.length === 1);
+	if (isDefaultStack) {
+		flags.push("--yes");
+	} else {
+		const combinedFrontends = [
+			...stackState.webFrontend,
+			...stackState.nativeFrontend,
+		].filter((v, _, arr) => v !== "none" || arr.length === 1);
 
-	if (
-		!checkDefault("webFrontend", stackState.webFrontend) ||
-		!checkDefault("nativeFrontend", stackState.nativeFrontend)
-	) {
 		if (combinedFrontends.length === 0 || combinedFrontends[0] === "none") {
 			flags.push("--frontend none");
 		} else {
 			flags.push(`--frontend ${combinedFrontends.join(" ")}`);
 		}
-	}
 
-	if (!checkDefault("backend", stackState.backend)) {
 		flags.push(`--backend ${stackState.backend}`);
-	}
 
-	if (stackState.backend !== "convex") {
-		if (!checkDefault("runtime", stackState.runtime)) {
+		if (stackState.backend !== "convex") {
 			flags.push(`--runtime ${stackState.runtime}`);
-		}
-		if (!checkDefault("api", stackState.api)) {
+
 			flags.push(`--api ${stackState.api}`);
-		}
 
-		const requiresExplicitDatabase = [
-			"d1",
-			"turso",
-			"neon",
-			"supabase",
-			"prisma-postgres",
-			"mongodb-atlas",
-			"docker",
-		].includes(stackState.dbSetup);
-
-		if (
-			!checkDefault("database", stackState.database) ||
-			requiresExplicitDatabase
-		) {
 			flags.push(`--database ${stackState.database}`);
-		}
-		if (!checkDefault("orm", stackState.orm)) {
+
 			flags.push(`--orm ${stackState.orm}`);
-		}
-		if (!checkDefault("auth", stackState.auth)) {
+
+			flags.push(`--auth ${stackState.auth}`);
+
+			flags.push(`--db-setup ${stackState.dbSetup}`);
+		} else {
 			flags.push(`--auth ${stackState.auth}`);
 		}
-		if (!checkDefault("dbSetup", stackState.dbSetup)) {
-			flags.push(`--db-setup ${stackState.dbSetup}`);
-		}
-	} else {
-	}
 
-	if (!checkDefault("packageManager", stackState.packageManager)) {
 		flags.push(`--package-manager ${stackState.packageManager}`);
-	}
 
-	if (!checkDefault("git", stackState.git)) {
-		if (stackState.git === "false" && DEFAULT_STACK.git === "true") {
+		if (stackState.git === "false") {
 			flags.push("--no-git");
+		} else {
+			flags.push("--git");
 		}
-	}
 
-	if (
-		stackState.webDeploy &&
-		!checkDefault("webDeploy", stackState.webDeploy)
-	) {
 		flags.push(`--web-deploy ${stackState.webDeploy}`);
-	}
 
-	if (
-		stackState.serverDeploy &&
-		!checkDefault("serverDeploy", stackState.serverDeploy)
-	) {
 		flags.push(`--server-deploy ${stackState.serverDeploy}`);
-	}
 
-	if (!checkDefault("install", stackState.install)) {
-		if (stackState.install === "false" && DEFAULT_STACK.install === "true") {
+		if (stackState.install === "false") {
 			flags.push("--no-install");
+		} else {
+			flags.push("--install");
 		}
-	}
 
-	if (!checkDefault("addons", stackState.addons)) {
 		if (stackState.addons.length > 0) {
 			const validAddons = stackState.addons.filter((addon) =>
 				[
@@ -1242,25 +1223,15 @@ const generateCommand = (stackState: StackState): string => {
 			);
 			if (validAddons.length > 0) {
 				flags.push(`--addons ${validAddons.join(" ")}`);
-			} else {
-				if (DEFAULT_STACK.addons.length > 0) {
-					flags.push("--addons none");
-				}
 			}
 		} else {
-			if (DEFAULT_STACK.addons.length > 0) {
-				flags.push("--addons none");
-			}
+			flags.push("--addons none");
 		}
-	}
 
-	if (!checkDefault("examples", stackState.examples)) {
 		if (stackState.examples.length > 0) {
 			flags.push(`--examples ${stackState.examples.join(" ")}`);
 		} else {
-			if (DEFAULT_STACK.examples.length > 0) {
-				flags.push("--examples none");
-			}
+			flags.push("--examples none");
 		}
 	}
 
@@ -1695,6 +1666,29 @@ const StackBuilder = () => {
 			const isAlchemyServerDeploy = finalStack.serverDeploy === "alchemy";
 
 			if (isAlchemyWebDeploy || isAlchemyServerDeploy) {
+				return false;
+			}
+		}
+
+		if (category === "auth" && optionId === "clerk") {
+			if (finalStack.backend !== "convex") {
+				return false;
+			}
+
+			const hasClerkCompatibleFrontend =
+				finalStack.webFrontend.some((f) =>
+					[
+						"tanstack-router",
+						"react-router",
+						"tanstack-start",
+						"next",
+					].includes(f),
+				) ||
+				finalStack.nativeFrontend.some((f) =>
+					["native-nativewind", "native-unistyles"].includes(f),
+				);
+
+			if (!hasClerkCompatibleFrontend) {
 				return false;
 			}
 		}
