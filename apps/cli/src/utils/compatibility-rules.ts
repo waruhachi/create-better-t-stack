@@ -135,7 +135,6 @@ export function validateWorkersCompatibility(
 
 export function coerceBackendPresets(config: Partial<ProjectConfig>) {
 	if (config.backend === "convex") {
-		config.auth = false;
 		config.database = "none";
 		config.orm = "none";
 		config.api = "none";
@@ -144,7 +143,7 @@ export function coerceBackendPresets(config: Partial<ProjectConfig>) {
 		config.examples = ["todo"] as ProjectConfig["examples"];
 	}
 	if (config.backend === "none") {
-		config.auth = false;
+		config.auth = "none" as ProjectConfig["auth"];
 		config.database = "none";
 		config.orm = "none";
 		config.api = "none";
@@ -161,7 +160,13 @@ export function incompatibleFlagsForBackend(
 ): string[] {
 	const list: string[] = [];
 	if (backend === "convex") {
-		if (providedFlags.has("auth") && options.auth === true) list.push("--auth");
+		if (
+			providedFlags.has("auth") &&
+			options.auth &&
+			options.auth !== "none" &&
+			options.auth !== "clerk"
+		)
+			list.push(`--auth ${options.auth}`);
 		if (providedFlags.has("database") && options.database !== "none")
 			list.push(`--database ${options.database}`);
 		if (providedFlags.has("orm") && options.orm !== "none")
@@ -174,7 +179,8 @@ export function incompatibleFlagsForBackend(
 			list.push(`--db-setup ${options.dbSetup}`);
 	}
 	if (backend === "none") {
-		if (providedFlags.has("auth") && options.auth === true) list.push("--auth");
+		if (providedFlags.has("auth") && options.auth && options.auth !== "none")
+			list.push(`--auth ${options.auth}`);
 		if (providedFlags.has("database") && options.database !== "none")
 			list.push(`--database ${options.database}`);
 		if (providedFlags.has("orm") && options.orm !== "none")
@@ -210,8 +216,15 @@ export function validateApiFrontendCompatibility(
 export function isFrontendAllowedWithBackend(
 	frontend: Frontend,
 	backend?: ProjectConfig["backend"],
+	auth?: string,
 ) {
 	if (backend === "convex" && frontend === "solid") return false;
+
+	if (auth === "clerk" && backend === "convex") {
+		const incompatibleFrontends = ["nuxt", "svelte", "solid"];
+		if (incompatibleFrontends.includes(frontend)) return false;
+	}
+
 	return true;
 }
 

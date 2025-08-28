@@ -280,7 +280,7 @@ async function assertBtsConfig(
 		backend: string;
 		database: string;
 		orm: string;
-		auth: boolean;
+		auth: string;
 		addons: string[];
 		examples: string[];
 		api: string;
@@ -299,7 +299,7 @@ async function assertBtsConfig(
 		backend?: string;
 		database?: string;
 		orm?: string;
-		auth?: boolean;
+		auth?: string;
 		addons?: string[];
 		examples?: string[];
 		api?: string;
@@ -445,7 +445,8 @@ describe("create-better-t-stack smoke", () => {
 								"none",
 								"--api",
 								"none",
-								"--no-auth",
+								"--auth",
+								"none",
 								"--addons",
 								"none",
 								"--db-setup",
@@ -474,7 +475,7 @@ describe("create-better-t-stack smoke", () => {
 							backend,
 							database: "none",
 							orm: "none",
-							auth: false,
+							auth: "none",
 						});
 					});
 				}
@@ -513,6 +514,8 @@ describe("create-better-t-stack smoke", () => {
 						frontend,
 						"--backend",
 						"convex",
+						"--auth",
+						"none",
 						"--db-setup",
 						"none",
 						"--addons",
@@ -539,10 +542,232 @@ describe("create-better-t-stack smoke", () => {
 					backend: "convex",
 					database: "none",
 					orm: "none",
-					auth: false,
+					auth: "none",
 				});
 			});
 		}
+	});
+
+	describe("convex + clerk auth combinations", () => {
+		const WEB_FRONTENDS = [
+			"tanstack-router",
+			"react-router",
+			"tanstack-start",
+			"next",
+		] as const;
+		const NATIVE_FRONTENDS = ["native-nativewind", "native-unistyles"] as const;
+
+		for (const frontend of WEB_FRONTENDS) {
+			it(`scaffolds ${frontend} + convex + clerk`, async () => {
+				const projectName = `app-convex-clerk-${frontend.replace(/[^a-z-]/g, "").slice(0, 20)}`;
+				await runCli(
+					[
+						projectName,
+						"--yes",
+						"--frontend",
+						frontend,
+						"--backend",
+						"convex",
+						"--auth",
+						"clerk",
+						"--db-setup",
+						"none",
+						"--addons",
+						"none",
+						"--package-manager",
+						"bun",
+						"--no-install",
+						"--no-git",
+					],
+					workdir,
+				);
+
+				const projectDir = join(workdir, projectName);
+				assertScaffoldedProject(projectDir);
+				assertProjectStructure(projectDir, {
+					hasWeb: true,
+					hasNative: false,
+					hasConvexBackend: true,
+					hasServer: false,
+				});
+				assertBtsConfig(projectDir, {
+					frontend: [frontend],
+					backend: "convex",
+					database: "none",
+					orm: "none",
+					auth: "clerk",
+				});
+			});
+		}
+
+		for (const frontend of NATIVE_FRONTENDS) {
+			it(`scaffolds ${frontend} + convex + clerk`, async () => {
+				const projectName = `app-convex-clerk-${frontend.replace(/[^a-z-]/g, "").slice(0, 20)}`;
+				await runCli(
+					[
+						projectName,
+						"--yes",
+						"--frontend",
+						frontend,
+						"--backend",
+						"convex",
+						"--auth",
+						"clerk",
+						"--db-setup",
+						"none",
+						"--addons",
+						"none",
+						"--package-manager",
+						"bun",
+						"--no-install",
+						"--no-git",
+					],
+					workdir,
+				);
+
+				const projectDir = join(workdir, projectName);
+				assertScaffoldedProject(projectDir);
+				assertProjectStructure(projectDir, {
+					hasWeb: false,
+					hasNative: true,
+					hasConvexBackend: true,
+					hasServer: false,
+				});
+				assertBtsConfig(projectDir, {
+					frontend: [frontend],
+					backend: "convex",
+					database: "none",
+					orm: "none",
+					auth: "clerk",
+				});
+			});
+		}
+
+		it("scaffolds tanstack-router + native-nativewind + convex + clerk", async () => {
+			const projectName = "app-convex-clerk-web-native";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"native-nativewind",
+					"--backend",
+					"convex",
+					"--auth",
+					"clerk",
+					"--db-setup",
+					"none",
+					"--addons",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			assertScaffoldedProject(projectDir);
+			assertProjectStructure(projectDir, {
+				hasWeb: true,
+				hasNative: true,
+				hasConvexBackend: true,
+				hasServer: false,
+			});
+			assertBtsConfig(projectDir, {
+				frontend: ["tanstack-router", "native-nativewind"],
+				backend: "convex",
+				database: "none",
+				orm: "none",
+				auth: "clerk",
+			});
+		});
+
+		it("scaffolds next + native-unistyles + convex + clerk", async () => {
+			const projectName = "app-convex-clerk-next-native";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"next",
+					"native-unistyles",
+					"--backend",
+					"convex",
+					"--auth",
+					"clerk",
+					"--db-setup",
+					"none",
+					"--addons",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			assertScaffoldedProject(projectDir);
+			assertProjectStructure(projectDir, {
+				hasWeb: true,
+				hasNative: true,
+				hasConvexBackend: true,
+				hasServer: false,
+			});
+			assertBtsConfig(projectDir, {
+				frontend: ["next", "native-unistyles"],
+				backend: "convex",
+				database: "none",
+				orm: "none",
+				auth: "clerk",
+			});
+		});
+
+		it("scaffolds tanstack-start + native-nativewind + convex + clerk", async () => {
+			const projectName = "app-convex-clerk-start-native";
+			await runCli(
+				[
+					projectName,
+					"--yes",
+					"--frontend",
+					"tanstack-start",
+					"native-nativewind",
+					"--backend",
+					"convex",
+					"--auth",
+					"clerk",
+					"--db-setup",
+					"none",
+					"--addons",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+
+			const projectDir = join(workdir, projectName);
+			assertScaffoldedProject(projectDir);
+			assertProjectStructure(projectDir, {
+				hasWeb: true,
+				hasNative: true,
+				hasConvexBackend: true,
+				hasServer: false,
+			});
+			assertBtsConfig(projectDir, {
+				frontend: ["tanstack-start", "native-nativewind"],
+				backend: "convex",
+				database: "none",
+				orm: "none",
+				auth: "clerk",
+			});
+		});
 	});
 	afterAll(async () => {
 		try {
@@ -579,7 +804,7 @@ describe("create-better-t-stack smoke", () => {
 			backend: "hono",
 			database: "sqlite",
 			orm: "drizzle",
-			auth: true,
+			auth: "better-auth",
 			addons: [],
 		});
 	});
@@ -602,7 +827,8 @@ describe("create-better-t-stack smoke", () => {
 				"none",
 				"--api",
 				"none",
-				"--no-auth",
+				"--auth",
+				"none",
 				"--addons",
 				"none",
 				"--db-setup",
@@ -630,7 +856,7 @@ describe("create-better-t-stack smoke", () => {
 			backend: "hono",
 			database: "none",
 			orm: "none",
-			auth: false,
+			auth: "none",
 			addons: [],
 		});
 	});
@@ -653,7 +879,8 @@ describe("create-better-t-stack smoke", () => {
 				"none",
 				"--api",
 				"none",
-				"--no-auth",
+				"--auth",
+				"none",
 				"--addons",
 				"turborepo",
 				"--db-setup",
@@ -694,6 +921,8 @@ describe("create-better-t-stack smoke", () => {
 				"tanstack-router",
 				"--backend",
 				"convex",
+				"--auth",
+				"none",
 				"--db-setup",
 				"none",
 				"--addons",
@@ -719,7 +948,7 @@ describe("create-better-t-stack smoke", () => {
 			backend: "convex",
 			database: "none",
 			orm: "none",
-			auth: false,
+			auth: "none",
 			examples: ["todo"],
 		});
 	});
@@ -741,7 +970,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -784,7 +1014,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -827,7 +1058,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -870,7 +1102,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -913,7 +1146,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -960,7 +1194,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1005,7 +1240,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1050,7 +1286,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1097,7 +1334,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1143,7 +1381,8 @@ describe("create-better-t-stack smoke", () => {
 					"prisma",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1189,7 +1428,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1235,7 +1475,8 @@ describe("create-better-t-stack smoke", () => {
 					"mongoose",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1283,7 +1524,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"biome",
 					"--db-setup",
@@ -1328,7 +1570,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"turborepo",
 					"biome",
@@ -1377,7 +1620,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1417,7 +1661,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"orpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1458,7 +1703,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1477,7 +1723,7 @@ describe("create-better-t-stack smoke", () => {
 		it("rejects incompatible database and ORM combinations", async () => {
 			await runCliExpectingError(
 				[
-					"invalid-combo",
+					"invalid-combo-database-orm",
 					"--yes",
 					"--frontend",
 					"tanstack-router",
@@ -1491,7 +1737,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1510,7 +1757,7 @@ describe("create-better-t-stack smoke", () => {
 		it("rejects incompatible frontend and API combinations", async () => {
 			await runCliExpectingError(
 				[
-					"invalid-combo",
+					"invalid-combo-frontend-api",
 					"--yes",
 					"--frontend",
 					"nuxt",
@@ -1524,7 +1771,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1543,7 +1791,7 @@ describe("create-better-t-stack smoke", () => {
 		it("rejects multiple web frontends", async () => {
 			await runCliExpectingError(
 				[
-					"invalid-combo",
+					"invalid-combo-multiple-web",
 					"--yes",
 					"--frontend",
 					"tanstack-router",
@@ -1558,7 +1806,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1577,7 +1826,7 @@ describe("create-better-t-stack smoke", () => {
 		it("rejects Turso db-setup with non-SQLite database", async () => {
 			await runCliExpectingError(
 				[
-					"invalid-combo",
+					"invalid-combo-turso-sqlite",
 					"--yes",
 					"--frontend",
 					"tanstack-router",
@@ -1591,12 +1840,85 @@ describe("create-better-t-stack smoke", () => {
 					"prisma",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
 					"turso",
 					"--examples",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+		});
+
+		it("rejects convex + better-auth combination", async () => {
+			await runCliExpectingError(
+				[
+					"invalid-combo-convex-better-auth",
+					"--yes",
+					"--frontend",
+					"tanstack-router",
+					"--backend",
+					"convex",
+					"--auth",
+					"better-auth",
+					"--db-setup",
+					"none",
+					"--addons",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+		});
+
+		it("rejects nuxt + convex + clerk combination", async () => {
+			await runCliExpectingError(
+				[
+					"invalid-combo-nuxt-convex-clerk",
+					"--yes",
+					"--frontend",
+					"nuxt",
+					"--backend",
+					"convex",
+					"--auth",
+					"clerk",
+					"--db-setup",
+					"none",
+					"--addons",
+					"none",
+					"--package-manager",
+					"bun",
+					"--no-install",
+					"--no-git",
+				],
+				workdir,
+			);
+		});
+
+		it("rejects svelte + convex + clerk combination", async () => {
+			await runCliExpectingError(
+				[
+					"invalid-combo-svlete-convex-clerk",
+					"--yes",
+					"--frontend",
+					"svelte",
+					"--backend",
+					"convex",
+					"--auth",
+					"clerk",
+					"--db-setup",
+					"none",
+					"--addons",
 					"none",
 					"--package-manager",
 					"bun",
@@ -1627,7 +1949,8 @@ describe("create-better-t-stack smoke", () => {
 					"prisma",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1706,7 +2029,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1733,7 +2057,7 @@ describe("create-better-t-stack smoke", () => {
 		it("rejects incompatible runtime and backend combinations", async () => {
 			await runCliExpectingError(
 				[
-					"invalid-combo",
+					"invalid-combo-runtime-backend",
 					"--yes",
 					"--frontend",
 					"tanstack-router",
@@ -1747,7 +2071,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1766,7 +2091,7 @@ describe("create-better-t-stack smoke", () => {
 		it("rejects incompatible runtime and ORM combinations", async () => {
 			await runCliExpectingError(
 				[
-					"invalid-combo",
+					"invalid-combo-runtime-orm",
 					"--yes",
 					"--frontend",
 					"tanstack-router",
@@ -1780,7 +2105,8 @@ describe("create-better-t-stack smoke", () => {
 					"prisma",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1816,7 +2142,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1856,7 +2183,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1900,7 +2228,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"orpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1942,7 +2271,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -1982,7 +2312,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2014,6 +2345,8 @@ describe("create-better-t-stack smoke", () => {
 					"tanstack-router",
 					"--backend",
 					"convex",
+					"--auth",
+					"none",
 					"--db-setup",
 					"none",
 					"--addons",
@@ -2031,6 +2364,7 @@ describe("create-better-t-stack smoke", () => {
 			assertBtsConfig(projectDir, {
 				backend: "convex",
 				examples: ["todo"],
+				auth: "none",
 			});
 		});
 
@@ -2052,7 +2386,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2092,7 +2427,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2130,7 +2466,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"pwa",
 					"--db-setup",
@@ -2170,7 +2507,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"tauri",
 					"--db-setup",
@@ -2210,7 +2548,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"husky",
 					"--db-setup",
@@ -2251,6 +2590,7 @@ describe("create-better-t-stack smoke", () => {
 					"--api",
 					"trpc",
 					"--auth",
+					"better-auth",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2274,7 +2614,7 @@ describe("create-better-t-stack smoke", () => {
 				hasDatabase: true,
 			});
 			assertBtsConfig(projectDir, {
-				auth: true,
+				auth: "better-auth",
 			});
 		});
 
@@ -2296,7 +2636,8 @@ describe("create-better-t-stack smoke", () => {
 					"prisma",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2337,7 +2678,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2378,7 +2720,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"orpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2419,7 +2762,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"orpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2460,7 +2804,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"orpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2501,7 +2846,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"orpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2542,7 +2888,8 @@ describe("create-better-t-stack smoke", () => {
 					"drizzle",
 					"--api",
 					"trpc",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2583,7 +2930,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2606,7 +2954,7 @@ describe("create-better-t-stack smoke", () => {
 		});
 	});
 
-	describe.runIf(process.env.WITH_BUILD === "1")(
+	(process.env.WITH_BUILD === "1" ? describe : describe.skip)(
 		"build each scaffolded project",
 		() => {
 			const sanitize = (s: string) => s.replace(/[^a-z-]/g, "").slice(0, 30);
@@ -2640,6 +2988,24 @@ describe("create-better-t-stack smoke", () => {
 			for (const frontend of CONVEX_COMPATIBLE_FRONTENDS) {
 				projectNames.add(`app-convex-${sanitize(frontend)}`);
 			}
+
+			const WEB_FRONTENDS_CLERK = [
+				"tanstack-router",
+				"react-router",
+				"tanstack-start",
+				"next",
+			];
+			const NATIVE_FRONTENDS_CLERK = ["native-nativewind", "native-unistyles"];
+
+			for (const frontend of WEB_FRONTENDS_CLERK) {
+				projectNames.add(`app-convex-clerk-${sanitize(frontend)}`);
+			}
+			for (const frontend of NATIVE_FRONTENDS_CLERK) {
+				projectNames.add(`app-convex-clerk-${sanitize(frontend)}`);
+			}
+			projectNames.add("app-convex-clerk-web-native");
+			projectNames.add("app-convex-clerk-next-native");
+			projectNames.add("app-convex-clerk-start-native");
 			[
 				"app-default",
 				"app-min",
@@ -2839,7 +3205,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2885,7 +3252,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2931,7 +3299,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -2984,7 +3353,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -3028,7 +3398,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",
@@ -3070,7 +3441,8 @@ describe("create-better-t-stack smoke", () => {
 					"none",
 					"--api",
 					"none",
-					"--no-auth",
+					"--auth",
+					"none",
 					"--addons",
 					"none",
 					"--db-setup",

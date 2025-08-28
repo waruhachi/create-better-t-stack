@@ -66,15 +66,21 @@ export function validateDatabaseOrmAuth(
 		);
 	}
 
-	if (has("auth") && has("database") && cfg.auth && db === "none") {
+	if (
+		has("auth") &&
+		has("database") &&
+		cfg.auth !== "none" &&
+		db === "none" &&
+		cfg.backend !== "convex"
+	) {
 		exitWithError(
-			"Authentication requires a database. Please choose a database or set '--no-auth'.",
+			"Authentication requires a database. Please choose a database or set '--auth none'.",
 		);
 	}
 
-	if (cfg.auth && db === "none") {
+	if (cfg.auth !== "none" && db === "none" && cfg.backend !== "convex") {
 		exitWithError(
-			"Authentication requires a database. Please choose a database or set '--no-auth'.",
+			"Authentication requires a database. Please choose a database or set '--auth none'.",
 		);
 	}
 
@@ -177,6 +183,35 @@ export function validateBackendConstraints(
 	options: CLIInput,
 ): void {
 	const { backend } = config;
+
+	if (config.auth === "clerk" && backend !== "convex") {
+		exitWithError(
+			"Clerk authentication is only supported with the Convex backend. Please use '--backend convex' or choose a different auth provider.",
+		);
+	}
+
+	if (backend === "convex" && config.auth === "clerk" && config.frontend) {
+		const incompatibleFrontends = config.frontend.filter((f) =>
+			["nuxt", "svelte", "solid"].includes(f),
+		);
+		if (incompatibleFrontends.length > 0) {
+			exitWithError(
+				`Clerk authentication is not compatible with the following frontends: ${incompatibleFrontends.join(
+					", ",
+				)}. Please choose a different frontend or auth provider.`,
+			);
+		}
+	}
+
+	if (
+		backend === "convex" &&
+		config.auth === "better-auth" &&
+		providedFlags.has("auth")
+	) {
+		exitWithError(
+			"Better-Auth is not compatible with the Convex backend. Please use '--auth clerk' or '--auth none'.",
+		);
+	}
 
 	if (
 		providedFlags.has("backend") &&

@@ -7,7 +7,7 @@ import { addPackageDependency } from "../../utils/add-package-deps";
 
 export async function setupAuth(config: ProjectConfig) {
 	const { auth, frontend, backend, projectDir } = config;
-	if (backend === "convex" || !auth) {
+	if (!auth || auth === "none") {
 		return;
 	}
 
@@ -20,7 +20,48 @@ export async function setupAuth(config: ProjectConfig) {
 	const serverDirExists = await fs.pathExists(serverDir);
 
 	try {
-		if (serverDirExists) {
+		if (backend === "convex") {
+			if (auth === "clerk" && clientDirExists) {
+				const hasNextJs = frontend.includes("next");
+				const hasTanStackStart = frontend.includes("tanstack-start");
+				const hasViteReactOther = frontend.some((f) =>
+					["tanstack-router", "react-router"].includes(f),
+				);
+
+				if (hasNextJs) {
+					await addPackageDependency({
+						dependencies: ["@clerk/nextjs"],
+						projectDir: clientDir,
+					});
+				} else if (hasTanStackStart) {
+					await addPackageDependency({
+						dependencies: ["@clerk/tanstack-react-start"],
+						projectDir: clientDir,
+					});
+				} else if (hasViteReactOther) {
+					await addPackageDependency({
+						dependencies: ["@clerk/clerk-react"],
+						projectDir: clientDir,
+					});
+				}
+			}
+
+			const hasNativeWind = frontend.includes("native-nativewind");
+			const hasUnistyles = frontend.includes("native-unistyles");
+			if (
+				auth === "clerk" &&
+				nativeDirExists &&
+				(hasNativeWind || hasUnistyles)
+			) {
+				await addPackageDependency({
+					dependencies: ["@clerk/clerk-expo"],
+					projectDir: nativeDir,
+				});
+			}
+			return;
+		}
+
+		if (serverDirExists && auth === "better-auth") {
 			await addPackageDependency({
 				dependencies: ["better-auth"],
 				projectDir: serverDir,
@@ -40,10 +81,12 @@ export async function setupAuth(config: ProjectConfig) {
 		);
 
 		if (hasWebFrontend && clientDirExists) {
-			await addPackageDependency({
-				dependencies: ["better-auth"],
-				projectDir: clientDir,
-			});
+			if (auth === "better-auth") {
+				await addPackageDependency({
+					dependencies: ["better-auth"],
+					projectDir: clientDir,
+				});
+			}
 		}
 
 		if (
@@ -51,15 +94,17 @@ export async function setupAuth(config: ProjectConfig) {
 				frontend.includes("native-unistyles")) &&
 			nativeDirExists
 		) {
-			await addPackageDependency({
-				dependencies: ["better-auth", "@better-auth/expo"],
-				projectDir: nativeDir,
-			});
-			if (serverDirExists) {
+			if (auth === "better-auth") {
 				await addPackageDependency({
-					dependencies: ["@better-auth/expo"],
-					projectDir: serverDir,
+					dependencies: ["better-auth", "@better-auth/expo"],
+					projectDir: nativeDir,
 				});
+				if (serverDirExists) {
+					await addPackageDependency({
+						dependencies: ["@better-auth/expo"],
+						projectDir: serverDir,
+					});
+				}
 			}
 		}
 	} catch (error) {

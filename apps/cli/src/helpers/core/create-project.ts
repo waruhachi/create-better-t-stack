@@ -5,7 +5,6 @@ import { writeBtsConfig } from "../../utils/bts-config";
 import { exitWithError } from "../../utils/errors";
 import { formatProjectWithBiome } from "../../utils/format-with-biome";
 import { setupAddons } from "../addons/addons-setup";
-import { setupAuth } from "../addons/auth-setup";
 import { setupExamples } from "../addons/examples-setup";
 import { setupApi } from "../core/api-setup";
 import { setupBackendDependencies } from "../core/backend-setup";
@@ -13,6 +12,7 @@ import { setupDatabase } from "../core/db-setup";
 import { setupRuntime } from "../core/runtime-setup";
 import { setupServerDeploy } from "../deployment/server-deploy-setup";
 import { setupWebDeploy } from "../deployment/web-deploy-setup";
+import { setupAuth } from "./auth-setup";
 import { runConvexCodegen } from "./convex-codegen";
 import { createReadme } from "./create-readme";
 import { setupEnvironmentVariables } from "./env-setup";
@@ -46,8 +46,8 @@ export async function createProject(options: ProjectConfig) {
 		if (!isConvex) {
 			await setupDbOrmTemplates(projectDir, options);
 			await setupDockerComposeTemplates(projectDir, options);
-			await setupAuthTemplate(projectDir, options);
 		}
+		await setupAuthTemplate(projectDir, options);
 		if (options.examples.length > 0 && options.examples[0] !== "none") {
 			await setupExamplesTemplate(projectDir, options);
 		}
@@ -70,7 +70,7 @@ export async function createProject(options: ProjectConfig) {
 			await setupAddons(options);
 		}
 
-		if (!isConvex && options.auth) {
+		if (options.auth && options.auth !== "none") {
 			await setupAuth(options);
 		}
 

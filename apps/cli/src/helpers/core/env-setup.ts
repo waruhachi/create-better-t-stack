@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "fs-extra";
 import type { ProjectConfig } from "../../types";
-import { generateAuthSecret } from "../addons/auth-setup";
+import { generateAuthSecret } from "./auth-setup";
 
 export interface EnvVariable {
 	key: string;
@@ -143,6 +143,42 @@ export async function setupEnvironmentVariables(config: ProjectConfig) {
 					condition: true,
 				},
 			];
+
+			if (backend === "convex" && auth === "clerk") {
+				if (hasNextJs) {
+					clientVars.push(
+						{
+							key: "NEXT_PUBLIC_CLERK_FRONTEND_API_URL",
+							value: "",
+							condition: true,
+						},
+						{
+							key: "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+							value: "",
+							condition: true,
+						},
+						{
+							key: "CLERK_SECRET_KEY",
+							value: "",
+							condition: true,
+						},
+					);
+				} else if (hasReactRouter || hasTanStackRouter || hasTanStackStart) {
+					clientVars.push({
+						key: "VITE_CLERK_PUBLISHABLE_KEY",
+						value: "",
+						condition: true,
+					});
+					if (hasTanStackStart) {
+						clientVars.push({
+							key: "CLERK_SECRET_KEY",
+							value: "",
+							condition: true,
+						});
+					}
+				}
+			}
+
 			await addEnvVariablesToFile(path.join(clientDir, ".env"), clientVars);
 		}
 	}
@@ -168,6 +204,14 @@ export async function setupEnvironmentVariables(config: ProjectConfig) {
 					condition: true,
 				},
 			];
+
+			if (backend === "convex" && auth === "clerk") {
+				nativeVars.push({
+					key: "EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY",
+					value: "",
+					condition: true,
+				});
+			}
 			await addEnvVariablesToFile(path.join(nativeDir, ".env"), nativeVars);
 		}
 	}
