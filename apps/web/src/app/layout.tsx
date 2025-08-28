@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 });
 
 const ogImage =
-	"https://api.screenshothis.com/v1/screenshots/take?api_key=ss_live_NQJgRXqHcKPwnoMTuQmgiwLIGbVfihjpMyQhgsaMyNBHTyesvrxpYNXmdgcnxipc&url=https%3A%2F%2Fbetter-t-stack.dev%2F&width=1200&height=630&block_ads=true&block_cookie_banners=true&block_trackers=true&device_scale_factor=0.65&prefers_color_scheme=dark&is_cached=true&cache_key=cbts";
+	"https://api.screenshothis.com/v1/screenshots/take?api_key=ss_live_NQJgRXqHcKPwnoMTuQmgiwLIGbVfihjpMyQhgsaMyNBHTyesvrxpYNXmdgcnxipc&url=https%3A%2F%2Fbetter-t-stack.dev%2F&width=1200&height=630&block_ads=true&block_cookie_banners=true&block_trackers=true&device_scale_factor=0.65&prefers_color_scheme=dark&is_cached=true&cache_key=cbts2";
 
 export const metadata: Metadata = {
 	title: "Better-T Stack",
