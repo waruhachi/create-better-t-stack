@@ -5,6 +5,7 @@ import { join } from "node:path";
 import {
 	AddonsSchema,
 	APISchema,
+	AuthSchema,
 	BackendSchema,
 	DatabaseSchema,
 	DatabaseSetupSchema,
@@ -29,6 +30,7 @@ const DATABASE_SETUP_VALUES = DatabaseSetupSchema.options;
 const API_VALUES = APISchema.options;
 const WEB_DEPLOY_VALUES = WebDeploySchema.options;
 const SERVER_DEPLOY_VALUES = ServerDeploySchema.options;
+const AUTH_VALUES = AuthSchema.options;
 
 const configSchema = {
 	$schema: "http://json-schema.org/draft-07/schema#",
@@ -96,8 +98,9 @@ const configSchema = {
 			description: ExamplesSchema.description,
 		},
 		auth: {
-			type: "boolean",
-			description: "Whether authentication is enabled",
+			type: "string",
+			enum: AUTH_VALUES,
+			description: AuthSchema.description,
 		},
 		packageManager: {
 			type: "string",
