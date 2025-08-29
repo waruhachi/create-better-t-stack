@@ -1,18 +1,9 @@
 "use client";
 
 import { ExternalLink, File, Github, Monitor } from "lucide-react";
+import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
-
-export interface ShowcaseItemProps {
-	title: string;
-	description: string;
-	imageUrl: string;
-	liveUrl?: string;
-	sourceUrl?: string;
-	tags: string[];
-	index?: number;
-}
 
 export default function ShowcaseItem({
 	title,
@@ -22,7 +13,15 @@ export default function ShowcaseItem({
 	sourceUrl,
 	tags,
 	index = 0,
-}: ShowcaseItemProps) {
+}: {
+	title: string;
+	description: string;
+	imageUrl: string;
+	liveUrl?: string;
+	sourceUrl?: string;
+	tags: string[];
+	index?: number;
+}) {
 	const projectId = `PROJECT_${String(index + 1).padStart(3, "0")}`;
 
 	return (
@@ -78,7 +77,7 @@ export default function ShowcaseItem({
 					<div className="grid gap-2">
 						{liveUrl && (
 							<Link
-								href={liveUrl}
+								href={liveUrl as Route}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex items-center gap-2 rounded border border-border bg-primary/10 px-3 py-2 text-primary text-sm transition-all hover:bg-primary/20 hover:text-primary"
@@ -90,7 +89,7 @@ export default function ShowcaseItem({
 						)}
 						{sourceUrl && (
 							<Link
-								href={sourceUrl}
+								href={sourceUrl as Route}
 								target="_blank"
 								rel="noopener noreferrer"
 								className="flex items-center gap-2 rounded border border-border px-3 py-2 text-muted-foreground text-sm transition-all hover:bg-muted/40 hover:text-foreground"
