@@ -106,7 +106,7 @@ export default function Testimonials({
 	preloadedTestimonialsVideos: Preloaded<typeof api.testimonials.getVideos>;
 }) {
 	const videos = usePreloadedQuery(preloadedTestimonialsVideos).reverse();
-	const tweets = usePreloadedQuery(preloadedTestimonialsTweet).reverse();
+	const tweets = usePreloadedQuery(preloadedTestimonialsTweet);
 
 	const getResponsiveColumns = (numCols: number) => {
 		const columns: string[][] = Array(numCols)

@@ -27,6 +27,7 @@ export default defineSchema({
 
 	tweets: defineTable({
 		tweetId: v.string(),
+		order: v.optional(v.number()),
 	}),
 
 	showcase: defineTable({
