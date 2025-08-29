@@ -91,9 +91,7 @@ const TweetCard = ({ tweetId, index }: { tweetId: string; index: number }) => (
 			</div>
 			<div className="w-full min-w-0 overflow-hidden">
 				<div style={{ width: "100%", minWidth: 0, maxWidth: "100%" }}>
-					{/* <Suspense fallback={<TweetSkeleton />}> */}
 					<Tweet id={tweetId} components={components} />
-					{/* </Suspense> */}
 				</div>
 			</div>
 		</div>
@@ -107,11 +105,8 @@ export default function Testimonials({
 	preloadedTestimonialsTweet: Preloaded<typeof api.testimonials.getTweets>;
 	preloadedTestimonialsVideos: Preloaded<typeof api.testimonials.getVideos>;
 }) {
-	const videosData = usePreloadedQuery(preloadedTestimonialsVideos);
-	const tweetsData = usePreloadedQuery(preloadedTestimonialsTweet);
-
-	const videos = videosData || [];
-	const tweets = tweetsData || [];
+	const videos = usePreloadedQuery(preloadedTestimonialsVideos).reverse();
+	const tweets = usePreloadedQuery(preloadedTestimonialsTweet).reverse();
 
 	const getResponsiveColumns = (numCols: number) => {
 		const columns: string[][] = Array(numCols)
