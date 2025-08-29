@@ -498,7 +498,7 @@ export const TECH_OPTIONS: Record<
 			id: "fumadocs",
 			name: "Fumadocs",
 			description: "Build excellent documentation site",
-			icon: "",
+			icon: `${ICON_BASE_URL}/fumadocs.svg`,
 			color: "from-indigo-500 to-indigo-700",
 			default: false,
 		},
