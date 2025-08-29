@@ -1,18 +1,24 @@
 "use client";
 
-import type { api } from "@better-t-stack/backend/convex/_generated/api";
-import { type Preloaded, usePreloadedQuery } from "convex/react";
 import { Terminal } from "lucide-react";
 import Footer from "../../_components/footer";
 import ShowcaseItem from "../_components/ShowcaseItem";
 
-export default function ShowcasePage({
-	preloadedShowcase,
-}: {
-	preloadedShowcase: Preloaded<typeof api.showcase.getShowcaseProjects>;
-}) {
-	const showcaseProjects = usePreloadedQuery(preloadedShowcase);
+type ShowcaseProject = {
+	_id: string;
+	_creationTime: number;
+	title: string;
+	description: string;
+	imageUrl: string;
+	liveUrl: string;
+	tags: string[];
+};
 
+export default function ShowcasePage({
+	showcaseProjects,
+}: {
+	showcaseProjects: Array<ShowcaseProject>;
+}) {
 	return (
 		<main className="mx-auto min-h-svh max-w-[1280px]">
 			<div className="container mx-auto space-y-8 px-4 py-8 pt-16">

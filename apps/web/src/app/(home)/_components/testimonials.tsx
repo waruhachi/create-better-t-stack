@@ -1,7 +1,5 @@
 "use client";
 
-import type { api } from "@better-t-stack/backend/convex/_generated/api";
-import { type Preloaded, usePreloadedQuery } from "convex/react";
 import { Play, Terminal } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -99,14 +97,13 @@ const TweetCard = ({ tweetId, index }: { tweetId: string; index: number }) => (
 );
 
 export default function Testimonials({
-	preloadedTestimonialsTweet,
-	preloadedTestimonialsVideos,
+	videos,
+	tweets,
 }: {
-	preloadedTestimonialsTweet: Preloaded<typeof api.testimonials.getTweets>;
-	preloadedTestimonialsVideos: Preloaded<typeof api.testimonials.getVideos>;
+	videos: Array<{ embedId: string; title: string }>;
+	tweets: Array<{ tweetId: string }>;
 }) {
-	const videos = usePreloadedQuery(preloadedTestimonialsVideos).reverse();
-	const tweets = usePreloadedQuery(preloadedTestimonialsTweet);
+	const videosReversed = [...videos].reverse();
 
 	const getResponsiveColumns = (numCols: number) => {
 		const columns: string[][] = Array(numCols)
@@ -138,7 +135,7 @@ export default function Testimonials({
 	};
 
 	return (
-		<div className="mb-12 w-full max-w-full overflow-hidden px-4">
+		<div className="w-full max-w-full overflow-hidden px-4">
 			<div className="mb-8">
 				<div className="mb-6 flex flex-wrap items-center justify-between gap-2 sm:flex-nowrap">
 					<div className="flex items-center gap-2">
@@ -149,7 +146,7 @@ export default function Testimonials({
 					</div>
 					<div className="hidden h-px flex-1 bg-border sm:block" />
 					<span className="w-full text-right text-muted-foreground text-xs sm:w-auto sm:text-left">
-						[{videos.length} ENTRIES]
+						[{videosReversed.length} ENTRIES]
 					</span>
 				</div>
 
@@ -160,7 +157,7 @@ export default function Testimonials({
 						initial="hidden"
 						animate="visible"
 					>
-						{videos.map((video, index) => (
+						{videosReversed.map((video, index) => (
 							<VideoCard
 								key={`video-${video.embedId}`}
 								video={video}
@@ -177,7 +174,7 @@ export default function Testimonials({
 						initial="hidden"
 						animate="visible"
 					>
-						{videos.map((video, index) => (
+						{videosReversed.map((video, index) => (
 							<VideoCard
 								key={`video-${video.embedId}`}
 								video={video}

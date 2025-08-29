@@ -1,5 +1,12 @@
 "use client";
-import { Check, ChevronDown, ChevronRight, Copy, Terminal } from "lucide-react";
+import {
+	Check,
+	ChevronDown,
+	ChevronRight,
+	Copy,
+	Terminal,
+	Zap,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -28,7 +35,7 @@ export default function CommandSection() {
 	};
 
 	return (
-		<div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+		<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 			<div className="flex h-full flex-col justify-between rounded border border-border p-4">
 				<div className="mb-4 flex items-center justify-between">
 					<div className="flex items-center gap-2">
@@ -104,7 +111,7 @@ export default function CommandSection() {
 					<div className="space-y-3">
 						<div className="flex items-center justify-between rounded border border-border p-3">
 							<div className="flex items-center gap-2 text-sm">
-								<span className="text-primary">⚡</span>
+								<Zap className="h-4 w-4 text-primary" />
 								<span className="text-foreground">
 									Interactive configuration wizard
 								</span>

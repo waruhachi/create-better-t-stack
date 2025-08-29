@@ -1,6 +1,4 @@
 "use client";
-import type { api } from "@better-t-stack/backend/convex/_generated/api";
-import { type Preloaded, usePreloadedQuery } from "convex/react";
 import {
 	ChevronDown,
 	ChevronUp,
@@ -26,17 +24,33 @@ import {
 	sortSponsors,
 } from "@/lib/sponsor-utils";
 
-export default function SponsorsSection({
-	preloadedSponsors,
-}: {
-	preloadedSponsors: Preloaded<typeof api.sponsors.getSponsors>;
-}) {
-	const sponsorsData = usePreloadedQuery(preloadedSponsors);
+type SponsorEntry = {
+	sponsor: {
+		login: string;
+		name: string;
+		avatarUrl: string;
+		websiteUrl?: string;
+		linkUrl: string;
+		customLogoUrl?: string;
+		type: string;
+	};
+	isOneTime: boolean;
+	monthlyDollars: number;
+	privacyLevel: string;
+	tierName: string;
+	createdAt: string;
+	provider: string;
+};
 
+export default function SponsorsSection({
+	sponsors,
+}: {
+	sponsors: Array<SponsorEntry>;
+}) {
 	const [showPastSponsors, setShowPastSponsors] = useState(false);
 
-	const sponsors =
-		sponsorsData.map((sponsor) => ({
+	const sponsorsData =
+		sponsors.map((sponsor) => ({
 			...sponsor,
 			sponsor: {
 				...sponsor.sponsor,
@@ -44,16 +58,16 @@ export default function SponsorsSection({
 			},
 		})) || [];
 
-	const visibleSponsors = filterVisibleSponsors(sponsors);
+	const visibleSponsors = filterVisibleSponsors(sponsorsData);
 	const sortedSponsors = sortSponsors(visibleSponsors);
 	const currentSponsors = filterCurrentSponsors(sortedSponsors);
-	const pastSponsors = filterPastSponsors(sortSponsors(sponsors));
+	const pastSponsors = filterPastSponsors(sortSponsors(sponsorsData));
 	const specialSponsors = sortSpecialSponsors(
 		filterSpecialSponsors(currentSponsors),
 	);
 
 	return (
-		<div className="mb-12">
+		<div className="">
 			<div className="mb-6 flex flex-wrap items-center justify-between gap-2 sm:flex-nowrap">
 				<div className="flex items-center gap-2">
 					<Terminal className="h-5 w-5 text-primary" />

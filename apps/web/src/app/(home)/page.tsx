@@ -1,5 +1,5 @@
 import { api } from "@better-t-stack/backend/convex/_generated/api";
-import { preloadQuery } from "convex/nextjs";
+import { fetchQuery } from "convex/nextjs";
 import CommandSection from "./_components/command-section";
 import Footer from "./_components/footer";
 import HeroSection from "./_components/hero-section";
@@ -8,13 +8,14 @@ import StatsSection from "./_components/stats-section";
 import Testimonials from "./_components/testimonials";
 
 export default async function HomePage() {
-	const preloadedSponsors = await preloadQuery(api.sponsors.getSponsors);
-	const preloadedTestimonialsTweet = await preloadQuery(
-		api.testimonials.getTweets,
-	);
-	const preloadedTestimonialsVideos = await preloadQuery(
-		api.testimonials.getVideos,
-	);
+	const sponsors = await fetchQuery(api.sponsors.getSponsors);
+	const fetchedTweets = await fetchQuery(api.testimonials.getTweets);
+	const fetchedVideos = await fetchQuery(api.testimonials.getVideos);
+	const videos = fetchedVideos.map((v) => ({
+		embedId: v.embedId,
+		title: v.title,
+	}));
+	const tweets = fetchedTweets.map((t) => ({ tweetId: t.tweetId }));
 
 	const minimalAnalytics = await fetch(
 		"https://r2.better-t-stack.dev/analytics-minimal.json",
@@ -23,18 +24,15 @@ export default async function HomePage() {
 	const minimalAnalyticsData = await minimalAnalytics.json();
 
 	return (
-		<div className="mx-auto min-h-svh max-w-[1280px]">
-			<main className="mx-auto px-4 pt-12">
+		<main className="mx-auto min-h-svh max-w-[1280px]">
+			<div className="mx-auto flex flex-col gap-8 px-4 pt-12">
 				<HeroSection />
 				<CommandSection />
 				<StatsSection analyticsData={minimalAnalyticsData} />
-				<SponsorsSection preloadedSponsors={preloadedSponsors} />
-				<Testimonials
-					preloadedTestimonialsTweet={preloadedTestimonialsTweet}
-					preloadedTestimonialsVideos={preloadedTestimonialsVideos}
-				/>
-			</main>
+				<SponsorsSection sponsors={sponsors} />
+				<Testimonials tweets={tweets} videos={videos} />
+			</div>
 			<Footer />
-		</div>
+		</main>
 	);
 }

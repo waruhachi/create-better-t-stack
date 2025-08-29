@@ -33,7 +33,7 @@ export default function StatsSection({
 	const liveNpmDownloadCount = useNpmDownloadCounter(npmPackages);
 
 	return (
-		<div className="mb-8 grid grid-cols-1 gap-4 sm:mb-12 sm:grid-cols-2 lg:grid-cols-3">
+		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<Link href="/analytics">
 				<div className="cursor-pointer rounded border border-border p-4 transition-colors hover:bg-muted/10">
 					<div className="mb-3 flex items-center gap-2">
