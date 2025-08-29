@@ -31,14 +31,14 @@ export async function addDeploymentToProject(
 		const isBetterTStack = await isBetterTStackProject(projectDir);
 		if (!isBetterTStack) {
 			exitWithError(
-				"This doesn't appear to be a Better-T Stack project. Please run this command from the root of a Better-T Stack project.",
+				"This doesn't appear to be a Better-T-Stack project. Please run this command from the root of a Better-T-Stack project.",
 			);
 		}
 
 		const detectedConfig = await detectProjectConfig(projectDir);
 		if (!detectedConfig) {
 			exitWithError(
-				"Could not detect the project configuration. Please ensure this is a valid Better-T Stack project.",
+				"Could not detect the project configuration. Please ensure this is a valid Better-T-Stack project.",
 			);
 		}
 

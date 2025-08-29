@@ -52,7 +52,7 @@ const t = trpcServer.initTRPC.create();
 export const router = t.router({
 	init: t.procedure
 		.meta({
-			description: "Create a new Better-T Stack project",
+			description: "Create a new Better-T-Stack project",
 			default: true,
 			negateBooleans: true,
 		})
@@ -117,7 +117,7 @@ export const router = t.router({
 	add: t.procedure
 		.meta({
 			description:
-				"Add addons or deployment configurations to an existing Better-T Stack project",
+				"Add addons or deployment configurations to an existing Better-T-Stack project",
 		})
 		.input(
 			z.tuple([
@@ -140,11 +140,11 @@ export const router = t.router({
 			await addAddonsHandler(options);
 		}),
 	sponsors: t.procedure
-		.meta({ description: "Show Better-T Stack sponsors" })
+		.meta({ description: "Show Better-T-Stack sponsors" })
 		.mutation(async () => {
 			try {
 				renderTitle();
-				intro(pc.magenta("Better-T Stack Sponsors"));
+				intro(pc.magenta("Better-T-Stack Sponsors"));
 				const sponsors = await fetchSponsors();
 				displaySponsors(sponsors);
 			} catch (error) {
@@ -152,7 +152,7 @@ export const router = t.router({
 			}
 		}),
 	docs: t.procedure
-		.meta({ description: "Open Better-T Stack documentation" })
+		.meta({ description: "Open Better-T-Stack documentation" })
 		.mutation(async () => {
 			const DOCS_URL = "https://better-t-stack.dev/docs";
 			try {
@@ -186,7 +186,7 @@ export function createBtsCli() {
 }
 
 /**
- * Initialize a new Better-T Stack project
+ * Initialize a new Better-T-Stack project
  *
  * @example CLI usage:
  * ```bash

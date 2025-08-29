@@ -47,7 +47,7 @@ export async function createProjectHandler(
 	if (input.renderTitle !== false) {
 		renderTitle();
 	}
-	intro(pc.magenta("Creating a new Better-T Stack project"));
+	intro(pc.magenta("Creating a new Better-T-Stack project"));
 
 	if (input.yolo) {
 		consola.fatal("YOLO mode enabled - skipping checks. Things may break!");
@@ -265,7 +265,7 @@ export async function addAddonsHandler(input: AddInput) {
 
 		if (!detectedConfig) {
 			exitWithError(
-				"Could not detect project configuration. Please ensure this is a valid Better-T Stack project.",
+				"Could not detect project configuration. Please ensure this is a valid Better-T-Stack project.",
 			);
 		}
 

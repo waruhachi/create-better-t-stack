@@ -19,11 +19,10 @@ const geistMono = Geist_Mono({
 	variable: "--font-geist-mono",
 });
 
-const ogImage =
-	"https://api.screenshothis.com/v1/screenshots/take?api_key=ss_live_NQJgRXqHcKPwnoMTuQmgiwLIGbVfihjpMyQhgsaMyNBHTyesvrxpYNXmdgcnxipc&url=https%3A%2F%2Fbetter-t-stack.dev%2F&width=1200&height=630&block_ads=true&block_cookie_banners=true&block_trackers=true&device_scale_factor=0.65&prefers_color_scheme=dark&is_cached=true&cache_key=cbts2";
+const ogImage = "https://r2.better-t-stack.dev/og.png";
 
 export const metadata: Metadata = {
-	title: "Better-T Stack",
+	title: "Better-T-Stack",
 	description:
 		"A modern CLI tool for scaffolding end-to-end type-safe TypeScript projects with best practices and customizable configurations",
 	keywords: [
@@ -43,12 +42,12 @@ export const metadata: Metadata = {
 		"Better-Auth",
 		"convex",
 		"monorepo",
-		"Better-T Stack",
+		"Better-T-Stack",
 		"create-better-t-stack",
 	],
-	authors: [{ name: "Better-T Stack Team" }],
-	creator: "Better-T Stack",
-	publisher: "Better-T Stack",
+	authors: [{ name: "Better-T-Stack Team" }],
+	creator: "Better-T-Stack",
+	publisher: "Better-T-Stack",
 	formatDetection: {
 		email: false,
 		telephone: false,
@@ -58,17 +57,17 @@ export const metadata: Metadata = {
 		canonical: "/",
 	},
 	openGraph: {
-		title: "Better-T Stack",
+		title: "Better-T-Stack",
 		description:
 			"A modern CLI tool for scaffolding end-to-end type-safe TypeScript projects with best practices and customizable configurations",
 		url: "https://better-t-stack.dev",
-		siteName: "Better-T Stack",
+		siteName: "Better-T-Stack",
 		images: [
 			{
 				url: ogImage,
 				width: 1200,
 				height: 630,
-				alt: "Better-T Stack",
+				alt: "Better-T-Stack",
 			},
 		],
 		locale: "en_US",
@@ -76,7 +75,7 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "Better-T Stack",
+		title: "Better-T-Stack",
 		description:
 			"A modern CLI tool for scaffolding end-to-end type-safe TypeScript projects with best practices and customizable configurations",
 		images: [ogImage],

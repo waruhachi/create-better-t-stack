@@ -10,7 +10,7 @@ const Footer = () => {
 				<div className="mb-8 grid gap-8 sm:mb-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
 					<div className="sm:col-span-2 lg:col-span-1">
 						<h3 className="mb-3 flex items-center gap-2 font-semibold text-base text-foreground sm:mb-4">
-							<span>Better-T Stack</span>
+							<span>Better-T-Stack</span>
 						</h3>
 						<p className="mb-4 text-muted-foreground text-sm leading-relaxed sm:mb-6 sm:text-base lg:pr-4">
 							Type-safe, modern TypeScript scaffolding for full-stack web
@@ -94,7 +94,7 @@ const Footer = () => {
 
 				<div className="flex flex-col items-center justify-between gap-4 border-border border-t pt-6 sm:flex-row sm:gap-6 sm:pt-8">
 					<p className="text-center text-muted-foreground text-xs sm:text-left sm:text-sm">
-						© {new Date().getFullYear()} Better-T Stack. All rights reserved.
+						© {new Date().getFullYear()} Better-T-Stack. All rights reserved.
 					</p>
 					<p className="flex items-center gap-1.5 text-muted-foreground text-xs sm:text-sm">
 						Built with

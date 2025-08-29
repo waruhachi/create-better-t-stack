@@ -73,11 +73,11 @@ export default function StatsSection({
 						</div>
 
 						<div className="border-border/50 border-t pt-3">
-							<div className="flex items-center justify-between text-xs">
+							<div className="flex items-center justify-between gap-2 text-xs">
 								<span className="font-mono text-muted-foreground">
 									Last Updated
 								</span>
-								<span className="font-mono text-accent">
+								<span className="truncate font-mono text-accent">
 									{analyticsData?.lastUpdated ||
 										new Date().toLocaleDateString("en-US", {
 											month: "short",
@@ -134,11 +134,11 @@ export default function StatsSection({
 						</div>
 
 						<div className="border-border/50 border-t pt-3">
-							<div className="flex items-center justify-between text-xs">
+							<div className="flex items-center justify-between gap-2 text-xs">
 								<span className="font-mono text-muted-foreground">
 									Repository
 								</span>
-								<span className="font-mono text-accent">
+								<span className="truncate font-mono text-accent">
 									AmanVarshney01/create-better-t-stack
 								</span>
 							</div>
@@ -196,9 +196,9 @@ export default function StatsSection({
 						</div>
 
 						<div className="border-border/50 border-t pt-3">
-							<div className="flex items-center justify-between text-xs">
+							<div className="flex items-center justify-between gap-2 text-xs">
 								<span className="font-mono text-muted-foreground">Package</span>
-								<span className="font-mono text-accent">
+								<span className="truncate font-mono text-accent">
 									create-better-t-stack
 								</span>
 							</div>
