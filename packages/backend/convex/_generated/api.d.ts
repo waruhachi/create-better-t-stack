@@ -12,7 +12,6 @@ import type * as healthCheck from "../healthCheck.js";
 import type * as hooks from "../hooks.js";
 import type * as http from "../http.js";
 import type * as showcase from "../showcase.js";
-import type * as sponsors from "../sponsors.js";
 import type * as stats from "../stats.js";
 import type * as testimonials from "../testimonials.js";
 
@@ -35,7 +34,6 @@ declare const fullApi: ApiFromModules<{
   hooks: typeof hooks;
   http: typeof http;
   showcase: typeof showcase;
-  sponsors: typeof sponsors;
   stats: typeof stats;
   testimonials: typeof testimonials;
 }>;

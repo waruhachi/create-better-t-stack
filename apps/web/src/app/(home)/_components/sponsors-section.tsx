@@ -11,60 +11,29 @@ import {
 import Image from "next/image";
 import { useState } from "react";
 import {
-	calculateLifetimeContribution,
-	filterCurrentSponsors,
-	filterPastSponsors,
-	filterSpecialSponsors,
 	filterVisibleSponsors,
 	formatSponsorUrl,
 	getSponsorUrl,
 	isSpecialSponsor,
 	shouldShowLifetimeTotal,
 	sortSpecialSponsors,
-	sortSponsors,
 } from "@/lib/sponsor-utils";
-
-type SponsorEntry = {
-	sponsor: {
-		login: string;
-		name: string;
-		avatarUrl: string;
-		websiteUrl?: string;
-		linkUrl: string;
-		customLogoUrl?: string;
-		type: string;
-	};
-	isOneTime: boolean;
-	monthlyDollars: number;
-	privacyLevel: string;
-	tierName: string;
-	createdAt: string;
-	provider: string;
-};
+import type { SponsorsData } from "@/lib/types";
 
 export default function SponsorsSection({
-	sponsors,
+	sponsorsData,
 }: {
-	sponsors: Array<SponsorEntry>;
+	sponsorsData: SponsorsData;
 }) {
 	const [showPastSponsors, setShowPastSponsors] = useState(false);
 
-	const sponsorsData =
-		sponsors.map((sponsor) => ({
-			...sponsor,
-			sponsor: {
-				...sponsor.sponsor,
-				customLogoUrl: sponsor.sponsor.customLogoUrl || "",
-			},
-		})) || [];
-
-	const visibleSponsors = filterVisibleSponsors(sponsorsData);
-	const sortedSponsors = sortSponsors(visibleSponsors);
-	const currentSponsors = filterCurrentSponsors(sortedSponsors);
-	const pastSponsors = filterPastSponsors(sortSponsors(sponsorsData));
-	const specialSponsors = sortSpecialSponsors(
-		filterSpecialSponsors(currentSponsors),
-	);
+	const allCurrentSponsors = [
+		...sponsorsData.specialSponsors,
+		...sponsorsData.sponsors,
+	];
+	const visibleSponsors = filterVisibleSponsors(allCurrentSponsors);
+	const pastSponsors = sponsorsData.pastSponsors;
+	const specialSponsors = sortSpecialSponsors(sponsorsData.specialSponsors);
 
 	return (
 		<div className="">
@@ -117,15 +86,11 @@ export default function SponsorsSection({
 						<div className="space-y-4">
 							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 								{specialSponsors.map((entry, index) => {
-									const since = new Date(entry.createdAt).toLocaleDateString(
-										undefined,
-										{ year: "numeric", month: "short" },
-									);
 									const sponsorUrl = getSponsorUrl(entry);
 
 									return (
 										<div
-											key={entry.sponsor.login}
+											key={entry.githubId}
 											className="rounded border border-border"
 											style={{ animationDelay: `${index * 50}ms` }}
 										>
@@ -135,7 +100,7 @@ export default function SponsorsSection({
 													<div className="ml-auto flex items-center gap-2 text-muted-foreground text-xs">
 														<span>SPECIAL</span>
 														<span>•</span>
-														<span>SINCE {since.toUpperCase()}</span>
+														<span>{entry.sinceWhen.toUpperCase()}</span>
 													</div>
 												</div>
 											</div>
@@ -143,11 +108,8 @@ export default function SponsorsSection({
 												<div className="flex gap-4">
 													<div className="flex-shrink-0">
 														<Image
-															src={
-																entry.sponsor.customLogoUrl ||
-																entry.sponsor.avatarUrl
-															}
-															alt={entry.sponsor.name || entry.sponsor.login}
+															src={entry.avatarUrl}
+															alt={entry.name}
 															width={100}
 															height={100}
 															className="rounded border border-border transition-colors duration-300"
@@ -157,33 +119,38 @@ export default function SponsorsSection({
 													<div className="grid grid-cols-1 grid-rows-[1fr_auto] justify-between py-2">
 														<div>
 															<h3 className="truncate font-semibold text-foreground text-sm">
-																{entry.sponsor.name || entry.sponsor.login}
+																{entry.name}
 															</h3>
-															{entry.tierName && (
+															{shouldShowLifetimeTotal(entry) ? (
+																<>
+																	{entry.tierName && (
+																		<p className="text-primary text-xs">
+																			{entry.tierName}
+																		</p>
+																	)}
+																	<p className="text-muted-foreground text-xs">
+																		Total: {entry.formattedAmount}
+																	</p>
+																</>
+															) : (
 																<p className="text-primary text-xs">
 																	{entry.tierName}
-																</p>
-															)}
-															{shouldShowLifetimeTotal(entry) && (
-																<p className="text-muted-foreground text-xs">
-																	Total: ${calculateLifetimeContribution(entry)}
 																</p>
 															)}
 														</div>
 														<div className="flex flex-col">
 															<a
-																href={`https://github.com/${entry.sponsor.login}`}
+																href={entry.githubUrl}
 																target="_blank"
 																rel="noopener noreferrer"
 																className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
 															>
 																<Github className="size-3" />
 																<span className="truncate">
-																	{entry.sponsor.login}
+																	{entry.githubId}
 																</span>
 															</a>
-															{(entry.sponsor.websiteUrl ||
-																entry.sponsor.linkUrl) && (
+															{entry.websiteUrl && (
 																<a
 																	href={sponsorUrl}
 																	target="_blank"
@@ -207,98 +174,91 @@ export default function SponsorsSection({
 						</div>
 					)}
 
-					{currentSponsors.filter((s) => !isSpecialSponsor(s)).length > 0 && (
+					{sponsorsData.sponsors.length > 0 && (
 						<div className="space-y-4">
 							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-								{currentSponsors
-									.filter((s) => !isSpecialSponsor(s))
-									.map((entry, index) => {
-										const since = new Date(entry.createdAt).toLocaleDateString(
-											undefined,
-											{ year: "numeric", month: "short" },
-										);
-										return (
-											<div
-												key={entry.sponsor.login}
-												className="rounded border border-border"
-												style={{ animationDelay: `${index * 50}ms` }}
-											>
-												<div className="border-border border-b px-3 py-2">
-													<div className="flex items-center gap-2">
-														<span className="text-primary text-xs">▶</span>
-														<div className="ml-auto flex items-center gap-2 text-muted-foreground text-xs">
-															<span>SINCE {since.toUpperCase()}</span>
-														</div>
+								{sponsorsData.sponsors.map((entry, index) => {
+									const sponsorUrl = getSponsorUrl(entry);
+									return (
+										<div
+											key={entry.githubId}
+											className="rounded border border-border"
+											style={{ animationDelay: `${index * 50}ms` }}
+										>
+											<div className="border-border border-b px-3 py-2">
+												<div className="flex items-center gap-2">
+													<span className="text-primary text-xs">▶</span>
+													<div className="ml-auto flex items-center gap-2 text-muted-foreground text-xs">
+														<span>{entry.sinceWhen.toUpperCase()}</span>
 													</div>
 												</div>
-												<div className="p-4">
-													<div className="flex gap-4">
-														<div className="flex-shrink-0">
-															<Image
-																src={entry.sponsor.avatarUrl}
-																alt={entry.sponsor.name || entry.sponsor.login}
-																width={100}
-																height={100}
-																className="rounded border border-border transition-colors duration-300"
-																unoptimized
-															/>
-														</div>
-														<div className="grid grid-cols-1 grid-rows-[1fr_auto] justify-between py-2">
-															<div>
-																<h3 className="truncate font-semibold text-foreground text-sm">
-																	{entry.sponsor.name || entry.sponsor.login}
-																</h3>
-																{entry.tierName && (
-																	<p className="text-primary text-xs">
-																		{entry.tierName}
-																	</p>
-																)}
-																{shouldShowLifetimeTotal(entry) && (
+											</div>
+											<div className="p-4">
+												<div className="flex gap-4">
+													<div className="flex-shrink-0">
+														<Image
+															src={entry.avatarUrl}
+															alt={entry.name}
+															width={100}
+															height={100}
+															className="rounded border border-border transition-colors duration-300"
+															unoptimized
+														/>
+													</div>
+													<div className="grid grid-cols-1 grid-rows-[1fr_auto] justify-between py-2">
+														<div>
+															<h3 className="truncate font-semibold text-foreground text-sm">
+																{entry.name}
+															</h3>
+															{shouldShowLifetimeTotal(entry) ? (
+																<>
+																	{entry.tierName && (
+																		<p className="text-primary text-xs">
+																			{entry.tierName}
+																		</p>
+																	)}
 																	<p className="text-muted-foreground text-xs">
-																		Total: $
-																		{calculateLifetimeContribution(entry)}
+																		Total: {entry.formattedAmount}
 																	</p>
-																)}
-															</div>
-															<div className="flex flex-col">
+																</>
+															) : (
+																<p className="text-primary text-xs">
+																	{entry.tierName}
+																</p>
+															)}
+														</div>
+														<div className="flex flex-col">
+															<a
+																href={entry.githubUrl}
+																target="_blank"
+																rel="noopener noreferrer"
+																className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
+															>
+																<Github className="size-3" />
+																<span className="truncate">
+																	{entry.githubId}
+																</span>
+															</a>
+															{entry.websiteUrl && (
 																<a
-																	href={`https://github.com/${entry.sponsor.login}`}
+																	href={sponsorUrl}
 																	target="_blank"
 																	rel="noopener noreferrer"
 																	className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
 																>
-																	<Github className="size-3" />
+																	<Globe className="size-3" />
 																	<span className="truncate">
-																		{entry.sponsor.login}
+																		{formatSponsorUrl(sponsorUrl)}
 																	</span>
 																</a>
-																{(entry.sponsor.websiteUrl ||
-																	entry.sponsor.linkUrl) && (
-																	<a
-																		href={
-																			entry.sponsor.websiteUrl ||
-																			entry.sponsor.linkUrl
-																		}
-																		target="_blank"
-																		rel="noopener noreferrer"
-																		className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
-																	>
-																		<Globe className="size-3" />
-																		<span className="truncate">
-																			{formatSponsorUrl(
-																				entry.sponsor.websiteUrl ||
-																					entry.sponsor.linkUrl,
-																			)}
-																		</span>
-																	</a>
-																)}
-															</div>
+															)}
 														</div>
 													</div>
 												</div>
 											</div>
-										);
-									})}
+										</div>
+									);
+								})}
 							</div>
 						</div>
 					)}
@@ -330,16 +290,12 @@ export default function SponsorsSection({
 							{showPastSponsors && (
 								<div className="slide-in-from-top-2 grid animate-in grid-cols-1 gap-4 duration-300 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 									{pastSponsors.map((entry, index) => {
-										const since = new Date(entry.createdAt).toLocaleDateString(
-											undefined,
-											{ year: "numeric", month: "short" },
-										);
 										const wasSpecial = isSpecialSponsor(entry);
 										const sponsorUrl = getSponsorUrl(entry);
 
 										return (
 											<div
-												key={entry.sponsor.login}
+												key={entry.githubId}
 												className="rounded border border-border/70 bg-muted/20"
 												style={{ animationDelay: `${index * 50}ms` }}
 											>
@@ -355,7 +311,7 @@ export default function SponsorsSection({
 														<div className="ml-auto flex items-center gap-2 text-muted-foreground text-xs">
 															{wasSpecial && <span>SPECIAL</span>}
 															{wasSpecial && <span>•</span>}
-															<span>SINCE {since.toUpperCase()}</span>
+															<span>{entry.sinceWhen.toUpperCase()}</span>
 														</div>
 													</div>
 												</div>
@@ -363,11 +319,8 @@ export default function SponsorsSection({
 													<div className="flex gap-4">
 														<div className="flex-shrink-0">
 															<Image
-																src={
-																	entry.sponsor.customLogoUrl ||
-																	entry.sponsor.avatarUrl
-																}
-																alt={entry.sponsor.name || entry.sponsor.login}
+																src={entry.avatarUrl}
+																alt={entry.name}
 																width={80}
 																height={80}
 																className="rounded border border-border/70"
@@ -377,34 +330,38 @@ export default function SponsorsSection({
 														<div className="grid grid-cols-1 grid-rows-[1fr_auto] justify-between">
 															<div>
 																<h3 className="truncate font-semibold text-muted-foreground text-sm">
-																	{entry.sponsor.name || entry.sponsor.login}
+																	{entry.name}
 																</h3>
-																{entry.tierName && (
+																{shouldShowLifetimeTotal(entry) ? (
+																	<>
+																		{entry.tierName && (
+																			<p className="text-muted-foreground/70 text-xs">
+																				{entry.tierName}
+																			</p>
+																		)}
+																		<p className="text-muted-foreground/50 text-xs">
+																			Total: {entry.formattedAmount}
+																		</p>
+																	</>
+																) : (
 																	<p className="text-muted-foreground/70 text-xs">
 																		{entry.tierName}
-																	</p>
-																)}
-																{!entry.isOneTime && (
-																	<p className="text-muted-foreground/50 text-xs">
-																		Total: $
-																		{calculateLifetimeContribution(entry)}
 																	</p>
 																)}
 															</div>
 															<div className="flex flex-col">
 																<a
-																	href={`https://github.com/${entry.sponsor.login}`}
+																	href={entry.githubUrl}
 																	target="_blank"
 																	rel="noopener noreferrer"
 																	className="group flex items-center gap-2 text-muted-foreground/70 text-xs transition-colors hover:text-muted-foreground"
 																>
 																	<Github className="size-3" />
 																	<span className="truncate">
-																		{entry.sponsor.login}
+																		{entry.githubId}
 																	</span>
 																</a>
-																{(entry.sponsor.websiteUrl ||
-																	entry.sponsor.linkUrl) && (
+																{entry.websiteUrl && (
 																	<a
 																		href={sponsorUrl}
 																		target="_blank"

@@ -8,30 +8,24 @@ import {
 	HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import {
-	filterCurrentSponsors,
-	filterSpecialSponsors,
 	formatSponsorUrl,
 	getSponsorUrl,
 	sortSpecialSponsors,
 } from "@/lib/sponsor-utils";
-import type { Sponsor } from "@/lib/types";
+import type { Sponsor, SponsorsData } from "@/lib/types";
 
 export function SpecialSponsorBanner() {
 	const [specialSponsors, setSpecialSponsors] = useState<Sponsor[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		fetch("https://sponsors.amanv.dev/sponsors.json")
+		fetch("https://sponsors.better-t-stack.dev/sponsors.json")
 			.then((res) => {
 				if (!res.ok) throw new Error("Failed to fetch sponsors");
 				return res.json();
 			})
-			.then((data) => {
-				const sponsorsData = Array.isArray(data) ? data : [];
-				const currentSponsors = filterCurrentSponsors(sponsorsData);
-				const specials = sortSpecialSponsors(
-					filterSpecialSponsors(currentSponsors),
-				);
+			.then((data: SponsorsData) => {
+				const specials = sortSpecialSponsors(data.specialSponsors);
 				setSpecialSponsors(specials);
 				setLoading(false);
 			})
@@ -63,30 +57,21 @@ export function SpecialSponsorBanner() {
 		<div>
 			<div className="no-scrollbar grid grid-cols-4 items-center gap-2 overflow-x-auto whitespace-nowrap py-1">
 				{specialSponsors.map((entry) => {
-					const displayName = entry.sponsor.name || entry.sponsor.login;
-					const imgSrc = entry.sponsor.customLogoUrl || entry.sponsor.avatarUrl;
-					const since = new Date(entry.createdAt).toLocaleDateString(
-						undefined,
-						{
-							year: "numeric",
-							month: "short",
-						},
-					);
 					const sponsorUrl = getSponsorUrl(entry);
 
 					return (
-						<HoverCard key={entry.sponsor.login}>
+						<HoverCard key={entry.githubId}>
 							<HoverCardTrigger asChild>
 								<a
-									href={entry.sponsor.websiteUrl || sponsorUrl}
+									href={entry.websiteUrl || sponsorUrl}
 									target="_blank"
 									rel="noopener noreferrer"
-									aria-label={displayName}
+									aria-label={entry.name}
 									className="inline-flex"
 								>
 									<Image
-										src={imgSrc}
-										alt={displayName}
+										src={entry.avatarUrl}
+										alt={entry.name}
 										width={66}
 										height={66}
 										className="size-12 rounded border border-border"
@@ -105,13 +90,13 @@ export function SpecialSponsorBanner() {
 										<div className="ml-auto text-muted-foreground text-xs">
 											<span>SPECIAL</span>
 											<span className="px-1">•</span>
-											<span>SINCE {since.toUpperCase()}</span>
+											<span>{entry.sinceWhen.toUpperCase()}</span>
 										</div>
 									</div>
 									<div className="flex gap-3">
 										<Image
-											src={imgSrc}
-											alt={displayName}
+											src={entry.avatarUrl}
+											alt={entry.name}
 											width={80}
 											height={80}
 											className="rounded border border-border"
@@ -120,7 +105,7 @@ export function SpecialSponsorBanner() {
 										<div className="grid grid-cols-1 grid-rows-[1fr_auto]">
 											<div>
 												<h3 className="truncate font-semibold text-sm">
-													{displayName}
+													{entry.name}
 												</h3>
 												{entry.tierName ? (
 													<p className="text-primary text-xs">
@@ -130,17 +115,15 @@ export function SpecialSponsorBanner() {
 											</div>
 											<div className="flex flex-col gap-1">
 												<a
-													href={`https://github.com/${entry.sponsor.login}`}
+													href={entry.githubUrl}
 													target="_blank"
 													rel="noopener noreferrer"
 													className="group flex items-center gap-2 text-muted-foreground text-xs transition-colors hover:text-primary"
 												>
 													<Github className="h-4 w-4" />
-													<span className="truncate">
-														{entry.sponsor.login}
-													</span>
+													<span className="truncate">{entry.githubId}</span>
 												</a>
-												{entry.sponsor.websiteUrl || entry.sponsor.linkUrl ? (
+												{entry.websiteUrl ? (
 													<a
 														href={sponsorUrl}
 														target="_blank"

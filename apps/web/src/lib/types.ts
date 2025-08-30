@@ -25,19 +25,33 @@ export interface TechEdge {
 }
 
 export interface Sponsor {
-	sponsor: {
-		login: string;
-		name: string;
-		avatarUrl: string;
-		websiteUrl?: string;
-		linkUrl: string;
-		customLogoUrl: string;
-		type: string;
-	};
-	isOneTime: boolean;
-	monthlyDollars: number;
-	privacyLevel: string;
+	name: string;
+	githubId: string;
+	avatarUrl: string;
+	websiteUrl?: string;
+	githubUrl: string;
 	tierName: string;
-	createdAt: string;
-	provider: string;
+	totalProcessedAmount?: number;
+	sinceWhen: string;
+	transactionCount: number;
+	formattedAmount?: string;
+}
+
+export interface SponsorsData {
+	generated_at: string;
+	summary: {
+		total_sponsors: number;
+		total_lifetime_amount: number;
+		total_current_monthly: number;
+		special_sponsors: number;
+		current_sponsors: number;
+		past_sponsors: number;
+		top_sponsor: {
+			name: string;
+			amount: number;
+		};
+	};
+	specialSponsors: Sponsor[];
+	sponsors: Sponsor[];
+	pastSponsors: Sponsor[];
 }
