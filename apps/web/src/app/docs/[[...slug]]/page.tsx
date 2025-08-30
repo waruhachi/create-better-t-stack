@@ -50,16 +50,16 @@ export async function generateMetadata({
 	const page = source.getPage(slug);
 	if (!page) notFound();
 
-	const image = `/docs-og/${slug.join("/")}/image.png`;
+	// const image = `/docs-og/${slug.join("/")}/image.png`;
 	return {
 		title: page.data.title,
 		description: page.data.description,
-		openGraph: {
-			images: image,
-		},
-		twitter: {
-			card: "summary_large_image",
-			images: image,
-		},
+		// openGraph: {
+		// 	images: image,
+		// },
+		// twitter: {
+		// 	card: "summary_large_image",
+		// 	images: image,
+		// },
 	};
 }
