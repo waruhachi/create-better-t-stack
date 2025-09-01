@@ -40,6 +40,7 @@ export interface AggregatedAnalyticsData {
 		totalProjects: number;
 		avgProjectsPerDay: number;
 		authEnabledPercent: number;
+		mostPopularAuth: string;
 		mostPopularFrontend: string;
 		mostPopularBackend: string;
 		mostPopularORM: string;
@@ -284,13 +285,17 @@ export const cliVersionConfig = {
 } satisfies ChartConfig;
 
 export const authConfig = {
-	enabled: {
-		label: "Enabled",
+	"better-auth": {
+		label: "Better Auth",
 		color: "hsl(var(--chart-1))",
 	},
-	disabled: {
-		label: "Disabled",
+	clerk: {
+		label: "Clerk",
 		color: "hsl(var(--chart-2))",
+	},
+	none: {
+		label: "No Auth",
+		color: "hsl(var(--chart-3))",
 	},
 } satisfies ChartConfig;
 

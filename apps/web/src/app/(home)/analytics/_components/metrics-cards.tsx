@@ -3,7 +3,7 @@ import { Cpu, Download, Terminal, TrendingUp, Users } from "lucide-react";
 interface MetricsCardsProps {
 	totalProjects: number;
 	avgProjectsPerDay: number;
-	authEnabledPercent: number;
+	mostPopularAuth: string;
 	mostPopularFrontend: string;
 	mostPopularBackend: string;
 	mostPopularORM: string;
@@ -14,7 +14,7 @@ interface MetricsCardsProps {
 export function MetricsCards({
 	totalProjects,
 	avgProjectsPerDay,
-	authEnabledPercent,
+	mostPopularAuth,
 	mostPopularFrontend,
 	mostPopularBackend,
 	mostPopularORM,
@@ -117,16 +117,16 @@ export function MetricsCards({
 				<div className="rounded border border-border">
 					<div className="border-border border-b px-4 py-3">
 						<div className="flex items-center justify-between">
-							<span className="font-semibold text-sm">AUTH_ADOPTION</span>
+							<span className="font-semibold text-sm">TOP_AUTH</span>
 							<Users className="h-4 w-4 text-primary" />
 						</div>
 					</div>
 					<div className="p-4">
-						<div className="font-bold text-2xl text-primary">
-							{authEnabledPercent}%
+						<div className="truncate font-bold text-accent text-lg">
+							{mostPopularAuth}
 						</div>
 						<p className="mt-1 text-muted-foreground text-xs">
-							$ auth_enabled_percentage.sh
+							$ most_selected_auth.sh
 						</p>
 					</div>
 				</div>

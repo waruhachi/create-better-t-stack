@@ -15,13 +15,13 @@ export default function AnalyticsPage({
 }) {
 	const totalProjects = data?.summary?.totalProjects || 0;
 	const avgProjectsPerDay = data?.summary?.avgProjectsPerDay || 0;
-	const authEnabledPercent = data?.summary?.authEnabledPercent || 0;
 	const mostPopularFrontend = data?.summary?.mostPopularFrontend || "None";
 	const mostPopularBackend = data?.summary?.mostPopularBackend || "None";
 	const mostPopularORM = data?.summary?.mostPopularORM || "None";
 	const mostPopularAPI = data?.summary?.mostPopularAPI || "None";
 	const mostPopularPackageManager =
 		data?.summary?.mostPopularPackageManager || "npm";
+	const mostPopularAuth = data?.summary?.mostPopularAuth || "None";
 
 	return (
 		<div className="mx-auto min-h-svh max-w-[1280px]">
@@ -34,7 +34,7 @@ export default function AnalyticsPage({
 				<MetricsCards
 					totalProjects={totalProjects}
 					avgProjectsPerDay={avgProjectsPerDay}
-					authEnabledPercent={authEnabledPercent}
+					mostPopularAuth={mostPopularAuth}
 					mostPopularFrontend={mostPopularFrontend}
 					mostPopularBackend={mostPopularBackend}
 					mostPopularORM={mostPopularORM}

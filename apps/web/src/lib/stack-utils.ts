@@ -17,10 +17,6 @@ import {
 	stackUrlKeys,
 } from "@/lib/stack-url-state";
 
-const getValidIds = (category: keyof typeof TECH_OPTIONS): string[] => {
-	return TECH_OPTIONS[category]?.map((opt) => opt.id) ?? [];
-};
-
 const CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
 	"webFrontend",
 	"nativeFrontend",
@@ -40,207 +36,142 @@ const CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
 	"install",
 ];
 
-function getStackKeyFromUrlKey(urlKey: string): keyof StackState | null {
-	for (const [stackKey, urlKeyValue] of Object.entries(stackUrlKeys)) {
-		if (urlKeyValue === urlKey) {
-			return stackKey as keyof StackState;
-		}
-	}
-	return null;
-}
+const getStackKeyFromUrlKey = (urlKey: string): keyof StackState | null =>
+	(Object.entries(stackUrlKeys).find(
+		([, value]) => value === urlKey,
+	)?.[0] as keyof StackState) || null;
 
-export function parseSearchParamsToStack(searchParams: {
-	[key: string]: string | string[] | undefined;
-}): StackState {
+const isDefaultStack = (stack: StackState): boolean =>
+	Object.entries(DEFAULT_STACK).every(
+		([key, _defaultValue]) =>
+			key === "projectName" ||
+			isStackDefault(
+				stack,
+				key as keyof StackState,
+				stack[key as keyof StackState],
+			),
+	);
+
+export function parseSearchParamsToStack(
+	searchParams: Record<string, string | string[] | undefined>,
+): StackState {
 	const parsedStack: StackState = { ...DEFAULT_STACK };
 
-	for (const [key, value] of Object.entries(searchParams)) {
-		if (
-			key === "utm_source" ||
-			key === "utm_medium" ||
-			key === "utm_campaign"
-		) {
-			continue;
-		}
-
-		const stackKey = getStackKeyFromUrlKey(key);
-		if (stackKey && value !== undefined) {
-			try {
-				const parser = stackParsers[stackKey];
-				if (parser) {
-					const parsedValue = parser.parseServerSide(
-						Array.isArray(value) ? value[0] : value,
-					);
-					(parsedStack as Record<string, unknown>)[stackKey] = parsedValue;
+	Object.entries(searchParams)
+		.filter(([key]) => !key.startsWith("utm_"))
+		.forEach(([key, value]) => {
+			const stackKey = getStackKeyFromUrlKey(key);
+			if (stackKey && value !== undefined) {
+				try {
+					const parser = stackParsers[stackKey];
+					if (parser) {
+						parsedStack[stackKey] = parser.parseServerSide(
+							Array.isArray(value) ? value[0] : value,
+						) as never;
+					}
+				} catch (error) {
+					console.warn(`Failed to parse ${key}:`, error);
 				}
-			} catch (error) {
-				console.warn(`Failed to parse ${key}:`, error);
 			}
-		}
-	}
-
-	for (const [key, defaultValue] of Object.entries(DEFAULT_STACK)) {
-		if (parsedStack[key as keyof StackState] === undefined) {
-			(parsedStack as Record<string, unknown>)[key] = defaultValue;
-		}
-	}
+		});
 
 	return parsedStack;
 }
 
-/**
- * Generate a human-readable summary of the stack
- */
 export function generateStackSummary(stack: StackState): string {
-	const selectedTechs: string[] = [];
+	const selectedTechs = CATEGORY_ORDER.flatMap((category) => {
+		const options = TECH_OPTIONS[category];
+		const selectedValue = stack[category as keyof StackState];
 
-	for (const category of CATEGORY_ORDER) {
-		const categoryKey = category as keyof StackState;
-		const options = TECH_OPTIONS[category as keyof typeof TECH_OPTIONS];
-		const selectedValue = stack[categoryKey];
+		if (!options) return [];
 
-		if (!options) continue;
+		const getTechNames = (value: string | string[]) => {
+			const values = Array.isArray(value) ? value : [value];
+			return values
+				.filter(
+					(id) =>
+						id !== "none" &&
+						id !== "false" &&
+						!(["git", "install", "auth"].includes(category) && id === "true"),
+				)
+				.map((id) => options.find((opt) => opt.id === id)?.name)
+				.filter(Boolean) as string[];
+		};
 
-		if (Array.isArray(selectedValue)) {
-			if (
-				selectedValue.length === 0 ||
-				(selectedValue.length === 1 && selectedValue[0] === "none")
-			) {
-				continue;
-			}
-
-			for (const id of selectedValue) {
-				if (id === "none") continue;
-				const tech = options.find((opt) => opt.id === id);
-				if (tech) {
-					selectedTechs.push(tech.name);
-				}
-			}
-		} else {
-			const tech = options.find((opt) => opt.id === selectedValue);
-			if (
-				!tech ||
-				tech.id === "none" ||
-				tech.id === "false" ||
-				((category === "git" ||
-					category === "install" ||
-					category === "auth") &&
-					tech.id === "true")
-			) {
-				continue;
-			}
-			selectedTechs.push(tech.name);
-		}
-	}
+		return getTechNames(selectedValue);
+	});
 
 	return selectedTechs.length > 0 ? selectedTechs.join(" • ") : "Custom stack";
 }
 
 export function generateStackCommand(stack: StackState): string {
-	let base: string;
-	switch (stack.packageManager) {
-		case "npm":
-			base = "npx create-better-t-stack@latest";
-			break;
-		case "pnpm":
-			base = "pnpm create better-t-stack@latest";
-			break;
-		default:
-			base = "bun create better-t-stack@latest";
-			break;
-	}
+	const packageManagerCommands = {
+		npm: "npx create-better-t-stack@latest",
+		pnpm: "pnpm create better-t-stack@latest",
+		default: "bun create better-t-stack@latest",
+	};
 
+	const base =
+		packageManagerCommands[
+			stack.packageManager as keyof typeof packageManagerCommands
+		] || packageManagerCommands.default;
 	const projectName = stack.projectName || "my-better-t-app";
-	const flags: string[] = [];
 
-	const isDefaultStack = Object.keys(DEFAULT_STACK).every((key) => {
-		if (key === "projectName") return true;
-		const defaultKey = key as keyof StackState;
-		return isStackDefault(stack, defaultKey, stack[defaultKey]);
-	});
-
-	if (isDefaultStack) {
-		flags.push("--yes");
-	} else {
-		const combinedFrontends = [
-			...stack.webFrontend,
-			...stack.nativeFrontend,
-		].filter((v, _, arr) => v !== "none" || arr.length === 1);
-
-		if (combinedFrontends.length === 0 || combinedFrontends[0] === "none") {
-			flags.push("--frontend none");
-		} else {
-			flags.push(`--frontend ${combinedFrontends.join(" ")}`);
-		}
-
-		flags.push(`--backend ${stack.backend}`);
-		flags.push(`--runtime ${stack.runtime}`);
-		flags.push(`--api ${stack.api}`);
-		flags.push(`--auth ${stack.auth}`);
-		flags.push(`--database ${stack.database}`);
-		flags.push(`--orm ${stack.orm}`);
-		flags.push(`--db-setup ${stack.dbSetup}`);
-		flags.push(`--package-manager ${stack.packageManager}`);
-
-		if (stack.git === "false") {
-			flags.push("--no-git");
-		} else {
-			flags.push("--git");
-		}
-
-		flags.push(`--web-deploy ${stack.webDeploy}`);
-		flags.push(`--server-deploy ${stack.serverDeploy}`);
-
-		if (stack.install === "false") {
-			flags.push("--no-install");
-		} else {
-			flags.push("--install");
-		}
-
-		if (stack.addons.length > 0) {
-			const validAddons = stack.addons.filter((addon) =>
-				[
-					"pwa",
-					"tauri",
-					"starlight",
-					"biome",
-					"husky",
-					"turborepo",
-					"ultracite",
-					"fumadocs",
-					"oxlint",
-					"ruler",
-				].includes(addon),
-			);
-			if (validAddons.length > 0) {
-				flags.push(`--addons ${validAddons.join(" ")}`);
-			}
-		} else {
-			flags.push("--addons none");
-		}
-
-		if (stack.examples.length > 0) {
-			flags.push(`--examples ${stack.examples.join(" ")}`);
-		} else {
-			flags.push("--examples none");
-		}
+	if (isDefaultStack(stack)) {
+		return `${base} ${projectName} --yes`;
 	}
 
-	return `${base} ${projectName}${
-		flags.length > 0 ? ` ${flags.join(" ")}` : ""
-	}`;
+	const flags = [
+		`--frontend ${
+			[...stack.webFrontend, ...stack.nativeFrontend]
+				.filter((v, _, arr) => v !== "none" || arr.length === 1)
+				.join(" ") || "none"
+		}`,
+		`--backend ${stack.backend}`,
+		`--runtime ${stack.runtime}`,
+		`--api ${stack.api}`,
+		`--auth ${stack.auth}`,
+		`--database ${stack.database}`,
+		`--orm ${stack.orm}`,
+		`--db-setup ${stack.dbSetup}`,
+		`--package-manager ${stack.packageManager}`,
+		stack.git === "false" ? "--no-git" : "--git",
+		`--web-deploy ${stack.webDeploy}`,
+		`--server-deploy ${stack.serverDeploy}`,
+		stack.install === "false" ? "--no-install" : "--install",
+		`--addons ${
+			stack.addons.length > 0
+				? stack.addons
+						.filter((addon) =>
+							[
+								"pwa",
+								"tauri",
+								"starlight",
+								"biome",
+								"husky",
+								"turborepo",
+								"ultracite",
+								"fumadocs",
+								"oxlint",
+								"ruler",
+							].includes(addon),
+						)
+						.join(" ") || "none"
+				: "none"
+		}`,
+		`--examples ${stack.examples.join(" ") || "none"}`,
+	];
+
+	return `${base} ${projectName} ${flags.join(" ")}`;
 }
 
-/**
- * Generate stack URL from pathname and search params
- */
+// URL generation functions
 export function generateStackUrl(
 	pathname: string,
 	searchParams: URLSearchParams,
 ): string {
 	const searchString = searchParams.toString();
-	const relativeUrl = `${pathname}${searchString ? `?${searchString}` : ""}`;
-	return `https://better-t-stack.dev${relativeUrl}`;
+	return `https://better-t-stack.dev${pathname}${searchString ? `?${searchString}` : ""}`;
 }
 
 export function generateStackUrlFromState(
@@ -253,212 +184,148 @@ export function generateStackUrlFromState(
 			? window.location.origin
 			: "https://better-t-stack.dev");
 
-	const isDefaultStack = Object.keys(DEFAULT_STACK).every((key) => {
-		if (key === "projectName") return true;
-		const defaultKey = key as keyof StackState;
-		return isStackDefault(stack, defaultKey, stack[defaultKey]);
-	});
-
-	if (isDefaultStack) {
+	if (isDefaultStack(stack)) {
 		return `${origin}/stack`;
 	}
 
 	const stackParams = new URLSearchParams();
-
-	for (const [stackKey, urlKey] of Object.entries(stackUrlKeys)) {
+	Object.entries(stackUrlKeys).forEach(([stackKey, urlKey]) => {
 		const value = stack[stackKey as keyof StackState];
 		if (value !== undefined) {
-			if (Array.isArray(value)) {
-				stackParams.set(urlKey, value.join(","));
-			} else {
-				stackParams.set(urlKey, String(value));
-			}
+			stackParams.set(
+				urlKey,
+				Array.isArray(value) ? value.join(",") : String(value),
+			);
 		}
-	}
+	});
 
 	return `${origin}/stack?${stackParams.toString()}`;
 }
 
-export function useStackStateWithAllParams() {
+// Primary hook - simplified approach
+export function useStackState() {
 	const [stack, setStack] = useQueryStates(
 		stackParsers,
 		stackQueryStatesOptions,
 	);
 
-	const setStackWithAllParams = async (
-		newStack: Partial<StackState> | ((prev: StackState) => Partial<StackState>),
+	const updateStack = async (
+		updates: Partial<StackState> | ((prev: StackState) => Partial<StackState>),
 	) => {
-		const updatedStack =
-			typeof newStack === "function" ? newStack(stack) : newStack;
-		const finalStack = { ...stack, ...updatedStack };
+		const newStack = typeof updates === "function" ? updates(stack) : updates;
+		const finalStack = { ...stack, ...newStack };
 
-		const isFinalStackDefault = Object.keys(DEFAULT_STACK).every((key) => {
-			if (key === "projectName") return true;
-			const defaultKey = key as keyof StackState;
-			return isStackDefault(finalStack, defaultKey, finalStack[defaultKey]);
-		});
-
-		if (isFinalStackDefault) {
-			await setStack(null);
-		} else {
-			await setStack(finalStack);
-		}
+		await setStack(isDefaultStack(finalStack) ? null : finalStack);
 	};
 
-	return [stack, setStackWithAllParams] as const;
+	return [stack, updateStack] as const;
 }
 
+// Individual state hook - kept for backward compatibility but simplified
 export function useIndividualStackStates() {
-	const [projectName, setProjectName] = useQueryState(
-		"name",
-		parseAsString.withDefault(DEFAULT_STACK.projectName),
-	);
+	const getValidIds = (category: keyof typeof TECH_OPTIONS) =>
+		TECH_OPTIONS[category]?.map((opt) => opt.id) ?? [];
 
-	const [webFrontend, setWebFrontend] = useQueryState(
-		"fe-w",
-		parseAsArrayOf(parseAsString).withDefault(DEFAULT_STACK.webFrontend),
-	);
-
-	const [nativeFrontend, setNativeFrontend] = useQueryState(
-		"fe-n",
-		parseAsArrayOf(parseAsString).withDefault(DEFAULT_STACK.nativeFrontend),
-	);
-
-	const [runtime, setRuntime] = useQueryState(
-		"rt",
-		parseAsStringEnum(getValidIds("runtime")).withDefault(
-			DEFAULT_STACK.runtime,
+	// Individual query states
+	const queryStates = {
+		projectName: useQueryState(
+			"name",
+			parseAsString.withDefault(DEFAULT_STACK.projectName),
 		),
-	);
-
-	const [backend, setBackend] = useQueryState(
-		"be",
-		parseAsStringEnum(getValidIds("backend")).withDefault(
-			DEFAULT_STACK.backend,
+		webFrontend: useQueryState(
+			"fe-w",
+			parseAsArrayOf(parseAsString).withDefault(DEFAULT_STACK.webFrontend),
 		),
-	);
-
-	const [api, setApi] = useQueryState(
-		"api",
-		parseAsStringEnum(getValidIds("api")).withDefault(DEFAULT_STACK.api),
-	);
-
-	const [database, setDatabase] = useQueryState(
-		"db",
-		parseAsStringEnum(getValidIds("database")).withDefault(
-			DEFAULT_STACK.database,
+		nativeFrontend: useQueryState(
+			"fe-n",
+			parseAsArrayOf(parseAsString).withDefault(DEFAULT_STACK.nativeFrontend),
 		),
-	);
-
-	const [orm, setOrm] = useQueryState(
-		"orm",
-		parseAsStringEnum(getValidIds("orm")).withDefault(DEFAULT_STACK.orm),
-	);
-
-	const [dbSetup, setDbSetup] = useQueryState(
-		"dbs",
-		parseAsStringEnum(getValidIds("dbSetup")).withDefault(
-			DEFAULT_STACK.dbSetup,
+		runtime: useQueryState(
+			"rt",
+			parseAsStringEnum(getValidIds("runtime")).withDefault(
+				DEFAULT_STACK.runtime,
+			),
 		),
-	);
-
-	const [auth, setAuth] = useQueryState(
-		"au",
-		parseAsStringEnum(getValidIds("auth")).withDefault(DEFAULT_STACK.auth),
-	);
-
-	const [packageManager, setPackageManager] = useQueryState(
-		"pm",
-		parseAsStringEnum(getValidIds("packageManager")).withDefault(
-			DEFAULT_STACK.packageManager,
+		backend: useQueryState(
+			"be",
+			parseAsStringEnum(getValidIds("backend")).withDefault(
+				DEFAULT_STACK.backend,
+			),
 		),
-	);
-
-	const [addons, setAddons] = useQueryState(
-		"add",
-		parseAsArrayOf(parseAsString).withDefault(DEFAULT_STACK.addons),
-	);
-
-	const [examples, setExamples] = useQueryState(
-		"ex",
-		parseAsArrayOf(parseAsString).withDefault(DEFAULT_STACK.examples),
-	);
-
-	const [git, setGit] = useQueryState(
-		"git",
-		parseAsStringEnum(["true", "false"] as const).withDefault(
-			DEFAULT_STACK.git as "true" | "false",
+		api: useQueryState(
+			"api",
+			parseAsStringEnum(getValidIds("api")).withDefault(DEFAULT_STACK.api),
 		),
-	);
-
-	const [install, setInstall] = useQueryState(
-		"i",
-		parseAsStringEnum(["true", "false"] as const).withDefault(
-			DEFAULT_STACK.install as "true" | "false",
+		database: useQueryState(
+			"db",
+			parseAsStringEnum(getValidIds("database")).withDefault(
+				DEFAULT_STACK.database,
+			),
 		),
-	);
-
-	const [webDeploy, setWebDeploy] = useQueryState(
-		"wd",
-		parseAsStringEnum(getValidIds("webDeploy")).withDefault(
-			DEFAULT_STACK.webDeploy,
+		orm: useQueryState(
+			"orm",
+			parseAsStringEnum(getValidIds("orm")).withDefault(DEFAULT_STACK.orm),
 		),
-	);
-
-	const [serverDeploy, setServerDeploy] = useQueryState(
-		"sd",
-		parseAsStringEnum(getValidIds("serverDeploy")).withDefault(
-			DEFAULT_STACK.serverDeploy,
+		dbSetup: useQueryState(
+			"dbs",
+			parseAsStringEnum(getValidIds("dbSetup")).withDefault(
+				DEFAULT_STACK.dbSetup,
+			),
 		),
-	);
-
-	const stack: StackState = {
-		projectName,
-		webFrontend,
-		nativeFrontend,
-		runtime,
-		backend,
-		api,
-		database,
-		orm,
-		dbSetup,
-		auth,
-		packageManager,
-		addons,
-		examples,
-		git,
-		install,
-		webDeploy,
-		serverDeploy,
+		auth: useQueryState(
+			"au",
+			parseAsStringEnum(getValidIds("auth")).withDefault(DEFAULT_STACK.auth),
+		),
+		packageManager: useQueryState(
+			"pm",
+			parseAsStringEnum(getValidIds("packageManager")).withDefault(
+				DEFAULT_STACK.packageManager,
+			),
+		),
+		addons: useQueryState(
+			"add",
+			parseAsArrayOf(parseAsString).withDefault(DEFAULT_STACK.addons),
+		),
+		examples: useQueryState(
+			"ex",
+			parseAsArrayOf(parseAsString).withDefault(DEFAULT_STACK.examples),
+		),
+		git: useQueryState(
+			"git",
+			parseAsStringEnum(["true", "false"] as const).withDefault(
+				DEFAULT_STACK.git as "true" | "false",
+			),
+		),
+		install: useQueryState(
+			"i",
+			parseAsStringEnum(["true", "false"] as const).withDefault(
+				DEFAULT_STACK.install as "true" | "false",
+			),
+		),
+		webDeploy: useQueryState(
+			"wd",
+			parseAsStringEnum(getValidIds("webDeploy")).withDefault(
+				DEFAULT_STACK.webDeploy,
+			),
+		),
+		serverDeploy: useQueryState(
+			"sd",
+			parseAsStringEnum(getValidIds("serverDeploy")).withDefault(
+				DEFAULT_STACK.serverDeploy,
+			),
+		),
 	};
 
+	const stack: StackState = Object.fromEntries(
+		Object.entries(queryStates).map(([key, [value]]) => [key, value]),
+	) as StackState;
+
 	const setStack = async (updates: Partial<StackState>) => {
-		const setters = {
-			projectName: setProjectName,
-			webFrontend: setWebFrontend,
-			nativeFrontend: setNativeFrontend,
-			runtime: setRuntime,
-			backend: setBackend,
-			api: setApi,
-			database: setDatabase,
-			orm: setOrm,
-			dbSetup: setDbSetup,
-			auth: setAuth,
-			packageManager: setPackageManager,
-			addons: setAddons,
-			examples: setExamples,
-			git: setGit,
-			install: setInstall,
-			webDeploy: setWebDeploy,
-			serverDeploy: setServerDeploy,
-		};
-
 		const promises = Object.entries(updates).map(([key, value]) => {
-			const setter = setters[key as keyof typeof setters];
-			return setter(value as never);
+			const setter = queryStates[key as keyof typeof queryStates]?.[1];
+			return setter?.(value as never);
 		});
-
-		await Promise.all(promises);
+		await Promise.all(promises.filter(Boolean));
 	};
 
 	return [stack, setStack] as const;

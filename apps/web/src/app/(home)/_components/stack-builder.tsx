@@ -16,7 +16,6 @@ import {
 import { motion } from "motion/react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-
 import type React from "react";
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -44,7 +43,7 @@ import {
 	CATEGORY_ORDER,
 	generateStackCommand,
 	generateStackUrlFromState,
-	useStackStateWithAllParams,
+	useStackState,
 } from "@/lib/stack-utils";
 import { cn } from "@/lib/utils";
 
@@ -1171,7 +1170,7 @@ const analyzeStackCompatibility = (stack: StackState): CompatibilityResult => {
 };
 
 const StackBuilder = () => {
-	const [stack, setStack] = useStackStateWithAllParams();
+	const [stack, setStack] = useStackState();
 
 	const [command, setCommand] = useState("");
 	const [copied, setCopied] = useState(false);
@@ -1383,7 +1382,7 @@ const StackBuilder = () => {
 		}
 
 		startTransition(() => {
-			setStack((currentStack) => {
+			setStack((currentStack: StackState) => {
 				const catKey = category as keyof StackState;
 				const update: Partial<StackState> = {};
 				const currentValue = currentStack[catKey];

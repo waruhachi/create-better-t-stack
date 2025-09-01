@@ -412,10 +412,12 @@ export function StackConfigurationCharts({
 					<div className="border-border border-b px-4 py-3">
 						<div className="flex items-center gap-2">
 							<span className="text-primary text-xs">▶</span>
-							<span className="font-semibold text-sm">AUTH_ADOPTION.PIE</span>
+							<span className="font-semibold text-sm">
+								AUTH_DISTRIBUTION.PIE
+							</span>
 						</div>
 						<p className="mt-1 text-muted-foreground text-xs">
-							Authentication implementation rate
+							Authentication provider distribution
 						</p>
 					</div>
 					<div className="p-4">
@@ -439,9 +441,11 @@ export function StackConfigurationCharts({
 										<Cell
 											key={`auth-${entry.name}`}
 											fill={
-												entry.name === "enabled"
+												entry.name === "better-auth"
 													? "hsl(var(--chart-1))"
-													: "hsl(var(--chart-7))"
+													: entry.name === "clerk"
+														? "hsl(var(--chart-2))"
+														: "hsl(var(--chart-3))"
 											}
 										/>
 									))}

@@ -48,6 +48,7 @@ interface AggregatedAnalyticsData {
 		totalProjects: number;
 		avgProjectsPerDay: number;
 		authEnabledPercent: number;
+		mostPopularAuth: string;
 		mostPopularFrontend: string;
 		mostPopularBackend: string;
 		mostPopularORM: string;
@@ -242,10 +243,18 @@ async function generateAnalyticsData() {
 						cliVersionCounts[cliVersion] =
 							(cliVersionCounts[cliVersion] || 0) + 1;
 
-						const auth =
-							row["*.properties.auth"] === "True" ? "enabled" : "disabled";
+						// Handle both old boolean format and new string format
+						let auth: string;
+						const authValue = row["*.properties.auth"];
+						if (authValue === "True" || authValue === "true") {
+							auth = "better-auth"; // Old format: true -> better-auth
+						} else if (authValue === "False" || authValue === "false") {
+							auth = "none"; // Old format: false -> none
+						} else {
+							auth = authValue || "none"; // New format: use actual value
+						}
 						authCounts[auth] = (authCounts[auth] || 0) + 1;
-						if (auth === "enabled") authEnabledCount++;
+						if (auth !== "none") authEnabledCount++;
 
 						const git =
 							row["*.properties.git"] === "True" ? "enabled" : "disabled";
@@ -529,6 +538,7 @@ async function generateAnalyticsData() {
 				totalProjects: totalRecords,
 				avgProjectsPerDay,
 				authEnabledPercent,
+				mostPopularAuth: getMostPopular(authCounts),
 				mostPopularFrontend: getMostPopular(frontendCounts),
 				mostPopularBackend: getMostPopular(backendCounts),
 				mostPopularORM: getMostPopular(ormCounts),
