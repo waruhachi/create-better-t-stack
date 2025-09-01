@@ -14,10 +14,14 @@ export async function getExamplesChoice(
 	backend?: Backend,
 	api?: API,
 ): Promise<Examples[]> {
+	if (examples !== undefined) return examples;
+
 	if (api === "none") {
+		if (backend === "convex") {
+			return ["todo"];
+		}
 		return [];
 	}
-	if (examples !== undefined) return examples;
 
 	if (backend === "convex") {
 		return ["todo"];
