@@ -1339,11 +1339,10 @@ const StackBuilder = () => {
 								duration: 4000,
 							});
 						} else if (compatibilityAnalysis.changes.length > 1) {
-							const message = `${
-								compatibilityAnalysis.changes.length
-							} compatibility adjustments made:\n${compatibilityAnalysis.changes
-								.map((c) => `• ${c.message}`)
-								.join("\n")}`;
+							const message = `${compatibilityAnalysis.changes.length
+								} compatibility adjustments made:\n${compatibilityAnalysis.changes
+									.map((c) => `• ${c.message}`)
+									.join("\n")}`;
 							toast.info(message, {
 								duration: 5000,
 							});
@@ -1951,6 +1950,15 @@ const StackBuilder = () => {
 									</div>
 
 									<div className="grid grid-cols-2 gap-2">
+										<button
+											type="button"
+											onClick={saveCurrentStack}
+											className="flex items-center justify-center gap-2 rounded-md border border-border bg-fd-background px-3 py-2 font-medium text-muted-foreground text-xs transition-all hover:border-muted-foreground/30 hover:bg-muted hover:text-foreground"
+											title="Save current preferences"
+										>
+											<Star className="h-3.5 w-3.5" />
+											Save
+										</button>
 										{lastSavedStack ? (
 											<button
 												type="button"
@@ -1964,15 +1972,6 @@ const StackBuilder = () => {
 										) : (
 											<div className="h-9" />
 										)}
-										<button
-											type="button"
-											onClick={saveCurrentStack}
-											className="flex items-center justify-center gap-2 rounded-md border border-border bg-fd-background px-3 py-2 font-medium text-muted-foreground text-xs transition-all hover:border-muted-foreground/30 hover:bg-muted hover:text-foreground"
-											title="Save current preferences"
-										>
-											<Star className="h-3.5 w-3.5" />
-											Save
-										</button>
 									</div>
 
 									<ShareDialog stackUrl={getStackUrl()} stackState={stack}>
@@ -2095,10 +2094,10 @@ const StackBuilder = () => {
 
 												const disabledReason = isDisabled
 													? getDisabledReason(
-															stack,
-															categoryKey as keyof typeof TECH_OPTIONS,
-															tech.id,
-														)
+														stack,
+														categoryKey as keyof typeof TECH_OPTIONS,
+														tech.id,
+													)
 													: null;
 
 												return (
