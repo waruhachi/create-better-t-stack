@@ -1293,7 +1293,7 @@ export const getDisabledReason = (
 		finalStack.database === "none" &&
 		optionId !== "none"
 	) {
-		return "ORM requires a database. Select a database first (SQLite, PostgreSQL, MySQL, or MongoDB).";
+		return "ORM requires a database. Select a database first (SQLite, PostgreSQL, or MongoDB).";
 	}
 
 	if (
@@ -1581,6 +1581,21 @@ export const getDisabledReason = (
 		}
 		if (finalStack.webFrontend.includes("solid")) {
 			return "AI example is not compatible with Solid frontend. Try React-based frontends.";
+		}
+	}
+
+	if (category === "dbSetup" && optionId === "supabase") {
+		if ((finalStack.database as string) !== "postgres") {
+			return "Supabase requires PostgreSQL database. Select PostgreSQL first.";
+		}
+	}
+
+	if (
+		category === "database" &&
+		(finalStack.dbSetup as string) === "supabase"
+	) {
+		if (optionId !== "postgres") {
+			return "Selected DB Setup 'Supabase' requires PostgreSQL. Select PostgreSQL or change DB Setup.";
 		}
 	}
 
