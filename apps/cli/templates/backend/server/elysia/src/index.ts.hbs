@@ -10,7 +10,11 @@ import { appRouter } from "./routers/index";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 {{/if}}
 {{#if (eq api "orpc")}}
+import { OpenAPIHandler } from "@orpc/openapi/fetch";
+import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
+import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { RPCHandler } from "@orpc/server/fetch";
+import { onError } from "@orpc/server";
 import { appRouter } from "./routers";
 import { createContext } from "./lib/context";
 {{/if}}
@@ -19,7 +23,25 @@ import { auth } from "./lib/auth";
 {{/if}}
 
 {{#if (eq api "orpc")}}
-const handler = new RPCHandler(appRouter);
+const rpcHandler = new RPCHandler(appRouter, {
+  interceptors: [
+    onError((error) => {
+      console.error(error);
+    }),
+  ],
+});
+const apiHandler = new OpenAPIHandler(appRouter, {
+  plugins: [
+    new OpenAPIReferencePlugin({
+      schemaConverters: [new ZodToJsonSchemaConverter()],
+    }),
+  ],
+  interceptors: [
+    onError((error) => {
+      console.error(error);
+    }),
+  ],
+});
 {{/if}}
 
 {{#if (eq runtime "node")}}
@@ -48,8 +70,15 @@ const app = new Elysia()
   {{/if}}
 {{#if (eq api "orpc")}}
   .all('/rpc*', async (context) => {
-    const { response } = await handler.handle(context.request, {
+    const { response } = await rpcHandler.handle(context.request, {
       prefix: '/rpc',
+      context: await createContext({ context })
+    })
+    return response ?? new Response('Not Found', { status: 404 })
+  })
+  .all('/api*', async (context) => {
+    const { response } = await apiHandler.handle(context.request, {
+      prefix: '/api',
       context: await createContext({ context })
     })
     return response ?? new Response('Not Found', { status: 404 })

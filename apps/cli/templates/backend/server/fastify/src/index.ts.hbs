@@ -9,8 +9,12 @@ import { appRouter, type AppRouter } from "./routers/index";
 {{/if}}
 
 {{#if (eq api "orpc")}}
+import { OpenAPIHandler } from "@orpc/openapi/node";
+import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
+import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { RPCHandler } from "@orpc/server/node";
 import { CORSPlugin } from "@orpc/server/plugins";
+import { onError } from "@orpc/server";
 import { appRouter } from "./routers/index";
 import { createServer } from "node:http";
 {{#if (eq auth "better-auth")}}
@@ -40,12 +44,30 @@ const baseCorsConfig = {
 };
 
 {{#if (eq api "orpc")}}
-const handler = new RPCHandler(appRouter, {
+const rpcHandler = new RPCHandler(appRouter, {
   plugins: [
     new CORSPlugin({
       origin: process.env.CORS_ORIGIN,
       credentials: true,
       allowHeaders: ["Content-Type", "Authorization"],
+    }),
+  ],
+  interceptors: [
+    onError((error) => {
+      console.error(error);
+    }),
+  ],
+});
+
+const apiHandler = new OpenAPIHandler(appRouter, {
+  plugins: [
+    new OpenAPIReferencePlugin({
+      schemaConverters: [new ZodToJsonSchemaConverter()],
+    }),
+  ],
+  interceptors: [
+    onError((error) => {
+      console.error(error);
     }),
   ],
 });
@@ -54,12 +76,21 @@ const fastify = Fastify({
   logger: true,
   serverFactory: (fastifyHandler) => {
     const server = createServer(async (req, res) => {
-      const { matched } = await handler.handle(req, res, {
+      const { matched } = await rpcHandler.handle(req, res, {
         context: await createContext(req.headers),
         prefix: "/rpc",
       });
 
       if (matched) {
+        return;
+      }
+
+      const apiResult = await apiHandler.handle(req, res, {
+        context: await createContext(req.headers),
+        prefix: "/api",
+      });
+
+      if (apiResult.matched) {
         return;
       }
 
